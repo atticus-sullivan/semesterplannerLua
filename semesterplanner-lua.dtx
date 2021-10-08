@@ -655,6 +655,7 @@ function addEvent(opts)
 
     if(not MIN_BYPASS and opts.from < MIN) then MIN = opts.from end
     if(not MAX_BYPASS and opts.to   > MAX) then MAX = opts.to   end
+    assert(opts.from < opts.to, "From has to be before to")
 
     table.insert(EVENTS, opts)
 end
@@ -732,23 +733,27 @@ function draw(length, width)
     local red = 0.3333 -- calculated in em from inner sep
     local red_y = 0.25 -- calculated in em
     for _,e in ipairs(events) do
-        d = search_array(daysE, e.day) - 1
-        tex.print(string.format(
-            [[\node[defStyle,text width=-%fem+%f%s/%d, text depth=%fcm-%fem, text height=%fem, %s] at (%f*%s,%fcm) {%s};]],
-            2*red, -- text width
-            e.scale_width, -- text width
-            textwidth,
-            #days, -- text width
-            length*(e.to-e.from)/(max-min), -- text depth
-            2*red+red_y, -- text depth
-            red_y, -- text height
-            e.tikz, -- free tikz code
-            (d+e.offset)/#days, -- xcoord
-            textwidth,
-            minuteToFrac(e.from,min,max)*-length, -- ycoord
-            e.content -- content
+        if e.from < max and e.to > min then -- only draw if event is in scope (part of the comp is done in addEvent from < to
+            if e.to   > max then e.to   = max end
+            if e.from < min then e.from = min end
+            d = search_array(daysE, e.day) - 1
+            tex.print(string.format(
+                [[\node[defStyle,text width=-%fem+%f%s/%d, text depth=%fcm-%fem, text height=%fem, %s] at (%f*%s,%fcm) {%s};]],
+                2*red, -- text width
+                e.scale_width, -- text width
+                textwidth,
+                #days, -- text width
+                length*(e.to-e.from)/(max-min), -- text depth
+                2*red+red_y, -- text depth
+                red_y, -- text height
+                e.tikz, -- free tikz code
+                (d+e.offset)/#days, -- xcoord
+                textwidth,
+                minuteToFrac(e.from,min,max)*-length, -- ycoord
+                e.content -- content
+                )
             )
-        )
+        end
     end
     tex.print([[\end{tikzpicture}]])
 end
