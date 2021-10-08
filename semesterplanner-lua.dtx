@@ -95,6 +95,7 @@ Running "make install" installs the files in the local TeX tree.
 \documentclass{ltxdoc}
 \usepackage[a4paper,margin=25mm,left=50mm,nohead]{geometry}
 \usepackage[numbered]{hypdoc}
+\usepackage{array}
 \usepackage{\jobname}
 \EnableCrossrefs
 \CodelineIndex
@@ -122,7 +123,7 @@ Running "make install" installs the files in the local TeX tree.
 %with tikz only\thanks{This file describes version \fileversion, last
 %revised \filedate.}
 %}
-%\author{Lukas Heindl\\GitLab:
+%\author{Lukas Heindl\\\faGitlab:
 %\url{https://gitlab.com/AtticusSullivan/semesterplanner-lua}}
 %\date{Released \filedate}
 %
@@ -132,49 +133,143 @@ Running "make install" installs the files in the local TeX tree.
 %\changes{v1.00}{2021/10/07}{First public release}
 %
 % \begin{abstract}
-% ==== Put abstract text here. ====
+% This package provides a mean to easily print a timetable e.g. for a
+% semesterplan. The reason for this package to exist is that I wanted to
+% reimplement \url{https://github.com/nlschn/semesterplanner/} with
+% printing the timetable with |tikz| only (which is more easily to be
+% modified) and with the ability to make entries spanning only a fraction
+% of the column (for showing simultanious events).
+% 
+% Documents using this package need to be compiled with
+% LuaLaTeX. The package requires |xcolor|, |fontawesome|, |tikz| (and |pgfkeys|).
 % \end{abstract}
 %
 % \tableofcontents
 %
 % \section{Usage}
+% \subsection{timetable}
 %
-% ==== Put descriptive text here. ====
+% \DescribeEnv{timetable} |\begin{timetable}[opts]\ldots\end{timetable}|\\
+% |opts| are of course optional arguments:
+% \begin{description}
+%     \item[|days|] List of the names of the days that should be set as
+%     column names. Note that if you specify only 4 names only these 4
+%     columns will be printed (with the first day being identified as
+%     Monday)
+%     \textit{Default: |Mon,Thue,Wend,Thur,Fri|}
+%     \item[|start time|] Explicit start-time of the timetable given in minutes
+%     (|HH*60 + MM|). Can be set as |start time/.evaluated={HH*60 + MM}|.
+%     If this is empty, the start time is derived from the given events.
+%     \textit{Default: |""|}
+%     \item[|end time|] Equivalent to |start-time|
+%     \textit{Default: |""|}
+%     \item[|width|] Give the width of the timetable. (can be given e.g. as
+%     |\textwidth| as this is directly given to tikz).
+%     \textit{Default:} |\textwidth|
+%     \item[|length|] Give the length of the timetable (measured in |cm|)
+%     (has to be a straight number since this is needed in calculation)
+%     \textit{Default: 10}
+% \end{description}
+% 
+% This is the core environment of this package. Within it you can use
+% |\lecture|, |\seminar|, |\tutorial|, |\officehour| and |\meeting|. All
+% these commands are only defined inside the |timetable| environment, and
+% have the same structure.
 %
-% \DescribeMacro{\dummyMacro}
-% This macro does nothing.\index{doing nothing|usage} It is merely an
-% example.  If this were a real macro, you would put a paragraph here
-% describing what the macro is supposed to do, what its mandatory and
-% optional arguments are, and so forth.
+% \DescribeMacro{\lecture}    |\lecture   {Name}{Lecturer}{Place}{Day}{Time}{Priority}{Event-code}|
 %
-% \DescribeEnv{dummyEnv}
-% This environment does nothing.  It is merely an example.
-% If this were a real environment, you would put a paragraph here
-% describing what the environment is supposed to do, what its
-% mandatory and optional arguments are, and so forth.
+% \DescribeMacro{\tutorial}   |\tutorial  {Name}{Lecturer}{Place}{Day}{Time}{Priority}{Event-code}|
+%
+% \DescribeMacro{\seminar}    |\seminar   {Name}{Lecturer}{Place}{Day}{Time}{Priority}{Event-code}|
+%
+% \DescribeMacro{\officehour} |\officehour{Name}{Lecturer}{Place}{Day}{Time}{Priority}{Event-code}|
+%
+% \DescribeMacro{\meeting}    |\meeting   {Name}{Lecturer}{Place}{Day}{Time}{Priority}{Event-code}|
+% \vspace*{2em}
+%
+% \begin{description}
+% 	\item[|Name|] Give the name of the lecture
+% 	\item[|Lecturer|] Give the name of the lecturer
+% 	\item[|Place|] Give the place of the event (most probably the room or
+% 	an online plattform, see \ref{icons})
+% 	\item[|Day|] The weekday on which the event takes place. Has to be one of
+% 	|M|, |T|, |W|, |Th|, |F| for \textbf{M}onday, \textbf{T}huesday,
+% 	\textbf{W}ednesday, \textbf{Th}ursday, \textbf{F}riday.  Might become
+% 	customizable in a future version.  \item[|Time|] The timespan of the
+% 	event formatted as |HH:MM-HH:MM| (24H clock)
+% 	\item[|Priority|] The priority of the event (see \ref{icons})
+% 	\item[|Event-code|] Free customizable event code. See the documentation
+% 	at the end for keys that can be used here (all keys in |/event|). To
+% 	simply pass arguments to the tikz-node that is being created for the
+% 	event use |tikz/.append={your arguments}| (be careful with |text width|,
+% 	|text height|, |text depth| as these keys are being used for
+% 	the dimensions of the node as well as with |anchor|)
+% \end{description}
+% The entries |Day| and |Time| are mandatory since they are needed for the
+% positioning of the node. All others are merely necessary for the content
+% of the node and are therefore nor mandatory.
+%
+% \subsubsection{Special Notes}
+% Note that the |length| argument does specify the length of the timetable
+% without taking account of the column headers.
+%
+% Same goes for the |width| parameter regarding the labels containing the
+% time on the right. Since in this case any tex-lenght is allowed, you can
+% simply try to subtract the length of the clock label using something like
+% |\settowidth{\length}{12:30}| to set a length to the length of a clock
+% label and then subtract this from the length you want to specify.
+%
+% \hangindent=4.5em \hangafter=1 \textbf{Hint:} The content of the
+% environment isn't processed by this package. Only the event commands (so
+% to speak |\lecture|,|\tutorial|,|\seminar|,|\officehour|,|\meeting| are
+% relevant.  All other contents are set immediately before the timetable.
+% Therefore, if you wan to add e.g. a |\hspace*{10cm}| to shift the
+% timetable to the left, the last line of the env would be the place to do
+% so (there musn't be an empty line below since otherwise a new paragraph
+% is started).
+%
+% \newpage
+% \subsubsection{Example}
+% |\begin{timetable}[|\\
+% |        days={Mon,Thue,Wend,Thur,Fri}, start|\\
+% |        time/.evaluated={11*60}, end time/.evaluated={15*60}|\\
+% |    ]|\\
+% |    \lecture{TestingLectureLongOne}{Heindl}{RN1}{W}{12:30-13:30}{}{}|\\
+% |    \lecture{TestingLectureLongOne}{Heindl}{RN1}{Th}{12:30-13:30}{}|\\
+% |         {offset=0.5,scale width=0.5}|\\
+% |    \lecture{TestingLectureLongOne}{Heindl}{\zoom}{T}{12:30-13:30}{\phigh}{}|\\
+% |\end{timetable}|\\
 %
 % \begin{timetable}[days={Mon,Thue,Wend,Thur,Fri}, start
 % time/.evaluated={11*60}, end time/.evaluated={15*60}]
 %   \lecture{TestingLectureLongOne}{Heindl}{RN1}{W}{12:30-13:30}{}{}
+%   \lecture{TestingLectureLongOne}{Heindl}{RN1}{Th}{12:30-13:30}{}{offset=0.5,scale width=0.5}
 %   \lecture{TestingLectureLongOne}{Heindl}{\zoom}{T}{12:30-13:30}{\phigh}{}
+%   \hspace*{-.2\textwidth}
 % \end{timetable}
 %
-% Special about the |length| argument is that the height of the column
-% headers (namely the weekdaynames) isn't counted to the length you can
-% specify.
+% \subsection{Icons}\label{icons}
+% This package defines some modified fontawesome icons (they are being
+% encircled with a white circle for better readability).\\
+% \begin{tabular}{rl|rl}
+%     |\zoom| & \textcolor{DodgerBlue}{\faCamera} &
+%     |\teams| & \textcolor{DodgerBlue}{\faWindows}
+%     \\
+%     |\BBB| & \textcolor{DodgerBlue}{\faBold} &
+%     |\youtube| & \textcolor{DodgerBlue}{\faYoutubePlay}
+%     \\\hline
+%     |\pmandatory| & \textcolor{red}{\faWarning} &
+%     |\phigh| & \textcolor{red}{\faFlag}
+%     \\
+%     |\pmid| & \textcolor{yellow}{\faFlag} &
+%     |\plow| & \textcolor{green}{\faFlag}
+%     \\
+%     |\pnone| & \textcolor{gray}{\faTimesCircle}
+%     \\ \hline
+%     |\tbd| & \faQuestion &
+%     |\tba| & \faBullhorn
+% \end{tabular}
 %
-% Same goes for the width regarding the labels containing the time on the
-% right. Since in this case any tex lenght is allowed, you can simply try
-% to subtract the length of the clock label using something like
-% |\settowidth{\length}{12:30}| to set a length to the length of a clock
-% label and then subtract this from the length you want to specify.
-%
-% Hint: The content of the environment isn't processed by thispackage, only
-% the event commands are relevant. All other contents are set immediately
-% before the timetable. Therefore, if you wan to add e.g. a
-% |\hspace*{10cm}| before the timetable, the last line of the env would be
-% the place to do so (there musn't be an empty line below since otherwise a
-%  new paragraph is started).
 %
 %
 %\StopEventually{
@@ -182,6 +277,7 @@ Running "make install" installs the files in the local TeX tree.
 %  \PrintIndex
 %}
 %
+% \newpage
 % \section{Implementation}
 % This package uses |semesterplanner-lua| as prefix/directory where
 % possible. Since this is not possible for latex macro names, in this
