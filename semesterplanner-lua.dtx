@@ -1,0 +1,720 @@
+% \iffalse meta-comment
+% vim: textwidth=75
+% vim: set tabstop=4 shiftwidth=4 expandtab
+%<*internal>
+\iffalse
+%</internal>
+%<*readme>
+|
+-------------------:| -----------------------------------------------------
+semesterplanner-lua:| Semesterplanner package in lua with tikz only
+             Author:| Lukas Heindl
+             GitLab:| https://gitlab.com/AtticusSullivan/semesterplanner-lua
+            License:| Released under the LaTeX Project Public License v1.3c or later
+                See:| http://www.latex-project.org/lppl.txt
+
+
+Short description:
+Some text about the package: probably the same as the abstract.
+%</readme>
+%<*internal>
+\fi
+\def\nameofplainTeX{plain}
+\ifx\fmtname\nameofplainTeX\else
+  \expandafter\begingroup
+\fi
+%</internal>
+%<*install>
+\input docstrip.tex
+\keepsilent
+\askforoverwritefalse
+\preamble
+-------------------:| -----------------------------------------------------
+semesterplanner-lua:| Semesterplanner package in lua with tikz only
+             Author:| Lukas Heindl
+             GitLab:| https://gitlab.com/AtticusSullivan/semesterplanner-lua
+            License:| Released under the LaTeX Project Public License v1.3c or later
+                See:| http://www.latex-project.org/lppl.txt
+
+\endpreamble
+\postamble
+
+Copyright (C) 2021 by Lukas Heindl
+
+This work may be distributed and/or modified under the
+conditions of the LaTeX Project Public License (LPPL), either
+version 1.3c of this license or (at your option) any later
+version.  The latest version of this license is in the file:
+
+http://www.latex-project.org/lppl.txt
+
+This work is "maintained" (as per LPPL maintenance status) by
+(not set).
+
+This work consists of the file semesterplanner-lua.dtx and a Makefile.
+Running "make" generates the derived files README, semesterplanner-lua.pdf and semesterplanner-lua.sty.
+Running "make inst" installs the files in the user's TeX tree.
+Running "make install" installs the files in the local TeX tree.
+
+\endpostamble
+
+\usedir{tex/latex/semesterplanner-lua}
+\generate{
+  \file{\jobname.sty}{\from{\jobname.dtx}{package}}
+}
+\usedir{tex/latex/semesterplanner-lua}
+\generate{
+  \nopreamble\nopostamble
+  \file{\jobname.lua}{\from{\jobname.dtx}{luaMain}}
+}
+%</install>
+%<install>\endbatchfile
+%<*internal>
+\usedir{source/latex/semesterplanner-lua}
+\generate{
+  \file{\jobname.ins}{\from{\jobname.dtx}{install}}
+}
+\nopreamble\nopostamble
+\usedir{doc/latex/semesterplanner-lua}
+\generate{
+  \file{README.txt}{\from{\jobname.dtx}{readme}}
+}
+\ifx\fmtname\nameofplainTeX
+  \expandafter\endbatchfile
+\else
+  \expandafter\endgroup
+\fi
+%</internal>
+% \fi
+%
+% \iffalse
+%<*driver>
+\ProvidesFile{semesterplanner-lua.dtx}
+%</driver>
+%<*driver>
+\documentclass{ltxdoc}
+\usepackage[a4paper,margin=25mm,left=50mm,nohead]{geometry}
+\usepackage[numbered]{hypdoc}
+\usepackage{\jobname}
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+%<package>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+%<package>\ProvidesPackage{semesterplanner-lua}
+%<*package>
+    [2021/10/07 v0.2 Semesterplanner package in lua with tikz only]
+
+\RequirePackage{tikz}
+\RequirePackage{pgfkeys}
+\RequirePackage{xcolor}
+\RequirePackage{fontawesome}
+%</package>
+% \fi
+%
+% \GetFileInfo{\jobname.dtx}
+% \DoNotIndex{\newcommand,\newenvironment,\\,\begin,\end,\def,\definecolor,\directlua,\endinput,\faBullhorn,\faCamera,\faFlag,\faQuestion,\faTimesCircle,\faWarning,\faWindows,\faYoutubePlay,\node,\pgfkeys,\pgfkeysvalueof,\protected,\raggedright,\textbf,\textcolor,\textwidth,\unexpanded,\"}
+%
+%\title{\textsf{semesterplanner-lua} --- Semesterplanner package in lua
+%with tikz only\thanks{This file describes version \fileversion, last
+%revised \filedate.}
+%}
+%\author{Lukas Heindl\\GitLab:
+%\url{https://gitlab.com/AtticusSullivan/semesterplanner-lua}}
+%\date{Released \filedate}
+%
+%
+%\maketitle
+%
+%\changes{v1.00}{2021/10/07}{First public release}
+%
+% \begin{abstract}
+% ==== Put abstract text here. ====
+% \end{abstract}
+%
+% \tableofcontents
+%
+% \section{Usage}
+%
+% ==== Put descriptive text here. ====
+%
+% \DescribeMacro{\dummyMacro}
+% This macro does nothing.\index{doing nothing|usage} It is merely an
+% example.  If this were a real macro, you would put a paragraph here
+% describing what the macro is supposed to do, what its mandatory and
+% optional arguments are, and so forth.
+%
+% \DescribeEnv{dummyEnv}
+% This environment does nothing.  It is merely an example.
+% If this were a real environment, you would put a paragraph here
+% describing what the environment is supposed to do, what its
+% mandatory and optional arguments are, and so forth.
+%
+% \begin{timetable}[days={Mon,Thue,Wend,Thur,Fri}, start
+% time/.evaluated={11*60}, end time/.evaluated={15*60}]
+%   \lecture{TestingLectureLongOne}{Heindl}{RN1}{W}{12:30-13:30}{}{}
+%   \lecture{TestingLectureLongOne}{Heindl}{\zoom}{T}{12:30-13:30}{\phigh}{}
+% \end{timetable}
+%
+% Special about the |length| argument is that the height of the column
+% headers (namely the weekdaynames) isn't counted to the length you can
+% specify.
+%
+% Same goes for the width regarding the labels containing the time on the
+% right. Since in this case any tex lenght is allowed, you can simply try
+% to subtract the length of the clock label using something like
+% |\settowidth{\length}{12:30}| to set a length to the length of a clock
+% label and then subtract this from the length you want to specify.
+%
+% Hint: The content of the environment isn't processed by thispackage, only
+% the event commands are relevant. All other contents are set immediately
+% before the timetable. Therefore, if you wan to add e.g. a
+% |\hspace*{10cm}| before the timetable, the last line of the env would be
+% the place to do so (there musn't be an empty line below since otherwise a
+%  new paragraph is started).
+%
+%
+%\StopEventually{
+%  \PrintChanges
+%  \PrintIndex
+%}
+%
+% \section{Implementation}
+% This package uses |semesterplanner-lua| as prefix/directory where
+% possible. Since this is not possible for latex macro names, in this
+% occasions |semesterplannerLua@| is used as prefix.
+% \subsection{semesterplanner-lua.sty}
+% \subsubsection{Global Stuff}
+%    \begin{macrocode}
+%<*package>
+%    \end{macrocode}
+% Define some colors for the course types (can be globally overwritten)
+%    \begin{macrocode}
+\definecolor{seminar}{rgb}{1.0, 0.8, 0.0}
+\definecolor{lecture}{rgb}{0.2, 0.7, 1.0}
+\definecolor{tutorial}{rgb}{0.0, 0.8, 0.0}
+\definecolor{meeting}{rgb}{0.8, 0.0, 0.0}
+\definecolor{officehour}{rgb}{0.0, 0.4, 0.6}
+\definecolor{DodgerBlue}{HTML}{1E90FF}
+%    \end{macrocode}
+
+% Load the lua module
+%    \begin{macrocode}
+\directlua{sp = require("semesterplanner.lua")}
+%    \end{macrocode}
+%
+% \subsubsection{Local Stuff (timetable-env local)}
+% \begin{environment}{timetable}
+% This is the environment doing all the stuff. To gate the positions where
+% the corresponding macros can be used (and in terms of pgfkeys for reasons
+% of default values) all the macros used are put into the environment.
+%    \begin{macrocode}
+\newenvironment{timetable}[1][]{
+%    \end{macrocode}
+% \begin{macro}{\semesterplannerLua@encircle}
+% This macro puts a circle arround its argument for better readability. In
+% this package this is used for the fontawesome symbols.
+%    \begin{macrocode}
+    \newcommand*{\semesterplannerLua@encircle}[1]{
+        \begin{minipage}[b][1em][c]{1.5em}
+            \begin{tikzpicture}
+                \node[fill,circle,inner sep=1pt, color = white] {##1};
+            \end{tikzpicture}   
+        \end{minipage}
+    }
+%    \end{macrocode}
+% \end{macro}
+%
+% Set all the pgfkeys required for the arguments. To achieve that the
+% defaults are restored every time the environment is used, this is
+% inside the environment definition. This of course disables all
+% possibilities of setting a global default but enables setting local
+% defaults for the events
+%    \begin{macrocode}
+    \pgfkeys{
+%    \end{macrocode}
+% |/semesterplanner-lua| will be the pgf-path used for this package
+% Set the environment arguments arguments. |days|, |width| and
+% |height| are used later in drawing. |start time| and |end time| are
+% important for collecting the events as well.
+% \begin{description}
+%   \item[|days|] is a list of
+%       strings representing the header names for the day columns in the
+%       timetable (adding Sat and Sun (additional entries) will result in
+%       two more columns.
+%   \item[|length|] is the vertical length of the
+%       timetable (not including the clock labels on the side)
+%       measured in cm (in future versions this may become measured in
+%       pts for better interaction with the LaTeX lengths.
+%   \item[|width|] is
+%       the horizontal width of the timetable (not including the column
+%       headers on the top) this can be a latex length string or
+%       |\textwidth| as well.
+%   \item[|start time|] can be used to set a fixed time where the timetable
+%       starts (otherwise this is calculated from the entries) to enable
+%       this behaviour this key has to be set to |HH*60 + MM| (easy way
+%       is by using |start time/.evaluated={HH*60+MM}|)
+%   \item[|end time|] equivalent to |start time|
+% \end{description}
+%    \begin{macrocode}
+        /semesterplanner-lua/.cd,
+        days/.initial={Mon,Thue,Wend,Thur,Fri},
+        days/.default={Mon,Thue,Wend,Thur,Fri},
+        %
+        start time/.initial=,
+        start time/.default=,
+        end time/.initial=,
+        end time/.default=,
+        %
+        width/.initial=\textwidth,
+        width/.default=\textwidth,
+        length/.initial=10,
+        length/.default=10,
+        %
+%    \end{macrocode}
+% |/semesterplanner-lua/event| is the path where the keys relevant
+% for the event macro resides
+% \begin{description}
+%   \item[|content|] is the content of the event (is passed on without any
+%           formatting). Since this is passed to lua without modification
+%           its value must be an unexpanded string (lua will simply print
+%           it so the eventually the string will be evaluated)
+%   \item[|time|] is a |HH:MM-HH:MM| string representing start- and
+%       end-time of the event
+%   \item[|day|] is either |M|,|T|,|W|,|Th| or |F| specifying the day on
+%       which the event takes place
+%   \item[|tikz|] this key allows the user to manually pass options to the
+%       node created for this event
+%   \item[|scale width|] allows to scale the width of the event to be able
+%       to draw overlapping events besides each other. Will usually be a
+%       value between |0| and |1|.
+%   \item[|offset|] same goal like |scale width| but shifts the event node
+%       by the given value to the right. (Given as value between |0| and
+%       |1| indicating how many columns the event should be shifted)
+% \end{description}
+%    \begin{macrocode}
+        event/.cd,
+        % event arguments
+        content/.initial=,
+        content/.default=,
+        %
+        time/.initial=,
+        time/.default=,
+        day/.initial=,
+        day/.default=,
+        %
+        tikz/.initial=,
+        tikz/.default=,
+        scale width/.initial=1,
+        scale width/.default=1,
+        offset/.initial=0,
+        offset/.default=0,
+    }
+%    \end{macrocode}
+
+%   Commands for symbols of priority
+%   \begin{macro}{\pmandatory}
+%    \begin{macrocode}
+    \protected\def\pmandatory{\semesterplannerLua@encircle{\textcolor{red}{\faWarning}}}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\phigh}
+%    \begin{macrocode}
+    \protected\def\phigh{\semesterplannerLua@encircle{\textcolor{red}{\faFlag}}}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\pmid}
+%    \begin{macrocode}
+    \protected\def\pmid{\semesterplannerLua@encircle{\textcolor{yellow}{\faFlag}}}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\plow}
+%    \begin{macrocode}
+    \protected\def\plow{\semesterplannerLua@encircle{\textcolor{green}{\faFlag}}}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\pnone}
+%    \begin{macrocode}
+    \protected\def\pnone{\semesterplannerLua@encircle{\textcolor{gray}{\faTimesCircle}}}
+%    \end{macrocode}
+%   \end{macro}
+
+%   Commands for online platforms.
+%   \begin{macro}{\teams}
+%    \begin{macrocode}
+    \protected\def\teams{\semesterplannerLua@encircle{\textcolor{DodgerBlue}{\faWindows}}}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\zoom}
+%    \begin{macrocode}
+    \protected\def\zoom{\semesterplannerLua@encircle{\textcolor{DodgerBlue}{\faCamera}}}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\youtube}
+%    \begin{macrocode}
+    \protected\def\youtube{\semesterplannerLua@encircle{\textcolor{red}{\faYoutubePlay}}}
+%    \end{macrocode}
+%   \end{macro}
+
+%   Command for "To be determined" and "To be Announced"
+%   \begin{macro}{\tbd}
+%    \begin{macrocode}
+    \protected\def\tbd{\faQuestion}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\tba}
+%    \begin{macrocode}
+    \protected\def\tba{\faBullhorn}
+%    \end{macrocode}
+%   \end{macro}
+
+%   Read the argumens given by the user after restoring the defaults
+%   (Restoring currently makes no sense, since they are created a few
+%   lines above anyways, but creation might be moved outside the
+%   environment some day.\\
+%   Afterwards the lua module is beeing initialized (erase data from
+%   possible previous runs.
+%    \begin{macrocode}
+    \pgfkeys{/semesterplanner-lua/.cd, days,length,width,start time,end time, #1}
+    \directlua{sp.init(
+        "\pgfkeysvalueof{/semesterplanner-lua/days}",
+        "\pgfkeysvalueof{/semesterplanner-lua/start time}",
+        "\pgfkeysvalueof{/semesterplanner-lua/end time}")}
+%    \end{macrocode}
+%   \begin{macro}{\semesterplanner@event}
+% Is used to pass the event to the lua engine which in turn will collect
+% the event to draw it in the end. For that the arguments given are parsed
+% after restoring the pgf keys to their default values. The optional
+% argument herby is a sequence of pgf keys, the second argument is
+% a string representing the content (this MUST be unexpanded since
+% this is passed to lua which in turn will pass it unmodified back)
+%    \begin{macrocode}
+    \newcommand{\semesterplannerLua@event}[2][]{
+        \pgfkeys{/semesterplanner-lua/event/.cd,content,time,day,tikz,scale width,
+        offset, ##1, content=##2}
+        \directlua{
+            sp.addEvent{
+                time="\pgfkeysvalueof{/semesterplanner-lua/event/time}",
+                day="\pgfkeysvalueof{/semesterplanner-lua/event/day}",
+                tikz=[[\pgfkeysvalueof{/semesterplanner-lua/event/tikz}]],
+                content=[[\pgfkeysvalueof{/semesterplanner-lua/event/content}]],
+                offset=\pgfkeysvalueof{/semesterplanner-lua/event/offset},
+                scale_width=\pgfkeysvalueof{/semesterplanner-lua/event/scale width},
+            }
+        }
+    }
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\semesterplannerLua@formattedEvent}
+% Simply a layer above |\semesterplannerLua@event| which formats the content
+% before passing it on. This formatting is thought to be a good formatting
+% for lecture-like entries and is heavily stolen from
+% \footnote{\url{https://github.com/nlschn/semesterplanner/}}
+% Takes a number of arguments:
+% \begin{enumerate}
+%   \item title of the event
+%   \item name of the speaker/lecturer
+%   \item location (e.g. roomnumber)
+%   \item day on which the event takes place (for valid values see the
+%       |day| pgf key above)
+%   \item time (for valid values / formatting see the |time| pgf key above)
+%   \item priority of the event (no special formatting needed, consider
+%       using one of |\phigh|, \ldots
+%   \item event code. This is passed to event-pgf unmodified and can
+%       overwrite any of the above keys. To add some arguments to tikz
+%       simply use |tikz/.append={draw=green}|
+%   \item background color of the event
+%   \item text color of the content
+% \end{enumerate}
+%    \begin{macrocode}
+    \def\semesterplannerLua@formattedEvent##1##2##3##4##5##6##7##8##9{
+        \semesterplannerLua@event[time=##5, day=##4, tikz={fill=##8}, ##7]
+        {
+            \unexpanded{
+                \textcolor{##9}{
+                    \textbf{##1}\\[.2em]
+                    \raggedright{##2}\\[0.5em]\raggedright{##6}\raggedright{##3}
+                }
+            }
+        }
+    }
+%    \end{macrocode}
+%   \end{macro}
+% Short-hand macros for different events using the corresponding
+% background color
+%
+%   \begin{macro}{\lecture}
+%    \begin{macrocode}
+    \def\lecture##1##2##3##4##5##6##7{
+        \semesterplannerLua@formattedEvent{##1}{##2}{##3}{##4}{##5}{##6}{##7}{lecture}{white}
+    }
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\seminar}
+%    \begin{macrocode}
+    \def\seminar##1##2##3##4##5##6##7{ %##1=title, ##2=speaker, ##3=location, ##4=day, ##5=time, ##6=priority, ##7=event-code (tikz can eb set this way too but you must use append)
+        \semesterplannerLua@formattedEvent{##1}{##2}{##3}{##4}{##5}{##6}{##7}{seminar}{white}
+    }
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\tutorial}
+%    \begin{macrocode}
+    \def\tutorial##1##2##3##4##5##6##7{ %##1=title, ##2=speaker, ##3=location, ##4=day, ##5=time, ##6=priority, ##7=event-code (tikz can eb set this way too but you must use append)
+        \semesterplannerLua@formattedEvent{##1}{##2}{##3}{##4}{##5}{##6}{##7}{tutorial}{white}
+    }
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\meeting}
+%    \begin{macrocode}
+    \def\meeting##1##2##3##4##5##6##7{ %##1=title, ##2=speaker, ##3=location, ##4=day, ##5=time, ##6=priority, ##7=event-code (tikz can eb set this way too but you must use append)
+        \semesterplannerLua@formattedEvent{##1}{##2}{##3}{##4}{##5}{##6}{##7}{meeting}{white}
+    }
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\officehour}
+%    \begin{macrocode}
+    \def\officehour##1##2##3##4##5##6##7{ %##1=title, ##2=speaker, ##3=location, ##4=day, ##5=time, ##6=priority, ##7=event-code (tikz can eb set this way too but you must use append)
+        \semesterplannerLua@formattedEvent{##1}{##2}{##3}{##4}{##5}{##6}{##7}{officehour}{white}
+    }
+%    \end{macrocode}
+%   \end{macro}
+%    \begin{macrocode}
+}{
+%    \end{macrocode}
+% At the end of the environment after all events have been collected,
+% generate and output the tikz code needed to draw the timetable.
+%    \begin{macrocode}
+    \directlua{sp.draw(
+        [[\pgfkeysvalueof{/semesterplanner-lua/length}]],
+        [[\pgfkeysvalueof{/semesterplanner-lua/width}]])}
+}
+%    \end{macrocode}
+% \end{environment}
+%
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
+
+% \subsection{semesterplanner-lua.lua}
+%    \begin{macrocode}
+%<*luaMain>
+%    \end{macrocode}
+% \begin{macro}{init}
+% Initialize global variables to remove previous values (e.g. events from
+% the previous timetable)
+% \begin{description}
+%	\item[|days|] A string with the names of the weekdays for the header
+%	\item[|min|] Time where the timetable should start. If empty this is
+%	calculated from the events.
+%	\item[|max|] Time where the timetable should end. If empty this is
+%	calculated from the events.
+% \end{description}
+%    \begin{macrocode}
+function init(days, min, max)
+    -- clean up first
+    -- global variables
+    EVENTS={}
+    DAYS = days -- header with names of the days set from tex currently
+    DAYSE = {"M","T","W","Th","F"}
+    MIN = 25*60 -- bigger than any allowed value could be
+    MAX = 0
+	MIN_BYPASS = false -- weather min is fixed by the user
+    MAX_BYPASS = false -- weather max is fixed by the user
+
+    if(min == "") then
+    else
+        assert(min:match("^%d+"), "start time has to be an integer representing the HH*60+MM of the desired start time")
+        MIN = tonumber(min)
+        MIN_BYPASS = true
+    end
+
+    if(max == "") then
+    else
+        assert(max:match("^%d+"), "end time has to be an integer representing the HH*60+MM of the desired end time")
+        MAX = tonumber(max)
+        MAX_BYPASS = true
+    end
+end
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{addEvent}
+% Adds the event to the |EVENTS| array after some validiy checks, modifys MIN/MAX if necessary
+%    \begin{macrocode}
+-- result are the global variables EVENTS, MIN and MAX
+function addEvent(opts)
+    if(not checkKeys(opts, {"time", "day", "content", "tikz"})) then
+        error("missing argument")
+    end
+
+    opts.from,opts.to = dur2Int(opts.time)
+
+    if(not MIN_BYPASS and opts.from < MIN) then MIN = opts.from end
+    if(not MAX_BYPASS and opts.to   > MAX) then MAX = opts.to   end
+
+    table.insert(EVENTS, opts)
+end
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{draw}
+%    \begin{macrocode}
+-- parameters are all global variables
+function draw(length, width)
+    print("length", length)
+    print("width", width)
+    -- copy relevant variables for working on local copies
+    local events = copy_array(EVENTS)
+    local days = prepareDays(DAYS)
+    local daysE = copy_array(DAYSE)
+    local min, minH, max, maxH = prepareMinMax(MIN, MAX)
+
+    assert(length:match("%d*%.?%d*"), "Length must be a valid length measured in cm")
+    length = tonumber(length)
+
+    textwidth = width
+
+    tex.print([[\begin{tikzpicture}]])
+    tex.print([[\tikzset{defStyle/.style={font=\tiny,anchor=north west,fill=blue!50,draw=black,rectangle}}]])
+
+    -- print the tabular with the weekday headers
+    tex.print(string.format([[\foreach \week [count=\x from 0, evaluate=\x as \y using \x+0.5] in {%s}{ ]], table.concat(days, ",")))
+    tex.print(string.format([[\node[anchor=south] at (\y/%d* %s, 0) {\week};]], #days, textwidth))
+    tex.print(string.format([[\draw (\x/%d * %s, 0cm) -- (\x/%d * %s, %dcm);]], #days, textwidth, #days, textwidth, -length))
+    tex.print("}")
+    tex.print(string.format([[\draw (%s, 0) -- (%s,%dcm);]], textwidth, textwidth, -length))
+
+    for i=minH,maxH do
+        tex.print(string.format([[\node[anchor=east] at (0,%fcm ) {%d:00};]], minuteToFrac(i*60,min,max)*-length, i))
+        tex.print(string.format([[\draw (0,%fcm ) -- (%s,%fcm );]], minuteToFrac(i*60,min,max)*-length, textwidth, minuteToFrac(i*60,min,max)*-length))
+    end
+
+    local d
+    local red = 0.3333 -- calculated in em from inner sep
+    local red_y = 0.25 -- calculated in em
+    for _,e in ipairs(events) do
+        d = search_array(daysE, e.day) - 1
+        tex.print(string.format(
+            [[\node[defStyle,text width=-%fem+%f%s/%d, text depth=%fcm-%fem, text height=%fem, %s] at (%f*%s,%fcm) {%s};]],
+            2*red, -- text width
+            e.scale_width, -- text width
+            textwidth,
+            #days, -- text width
+            length*(e.to-e.from)/(max-min), -- text depth
+            2*red+red_y, -- text depth
+            red_y, -- text height
+            e.tikz, -- free tikz code
+            (d+e.offset)/#days, -- xcoord
+            textwidth,
+            minuteToFrac(e.from,min,max)*-length, -- ycoord
+            e.content -- content
+            )
+        )
+    end
+    tex.print([[\end{tikzpicture}]])
+end
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{searchArray}
+%    \begin{macrocode}
+
+function search_array(t, s)
+    for k,v in ipairs(t) do
+        if(v == s) then return k end
+    end
+    return nil
+end
+
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{minuteToFrac}
+%    \begin{macrocode}
+function minuteToFrac(minute, min, max)
+    return (minute-min)/(max-min)
+end
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{prepareMinMax}
+%    \begin{macrocode}
+
+function prepareMinMax(min, max)
+    local minH = math.floor(min/60)
+    local maxH = math.ceil(max/60)
+    local min = minH*60
+    local max = maxH*60
+    return min, minH, max, maxH
+end
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{checkKeys}
+%    \begin{macrocode}
+
+function checkKeys(t, k)
+    for _,x in ipairs(k) do
+        if(t[x] == nil) then
+            return false
+        end
+    end
+    return true
+end
+
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{dur2Int}
+%    \begin{macrocode}
+function dur2Int(clk)
+    local f1,f2, t1,t2 = clk:match("^(%d%d?):(%d%d)-(%d%d?):(%d%d)$")
+    if(f1 ~= nil and f2 ~= nil and t1 ~= nil and t2 ~= nil) then
+        f1 = tonumber(f1) f2 = tonumber(f2)
+        t1 = tonumber(t1) t2 = tonumber(t2)
+        assert(f1 >= 0 and f1 < 24, "Hours have to be >= 0 && < 24")
+        assert(f2 >= 0 and f2 < 60, "Mins have to be >= 0 && < 60")
+        assert(t1 >= 0 and t1 < 24, "Hours have to be >= 0 && < 24")
+        assert(t2 >= 0 and t2 < 60, "Mins have to be >= 0 && < 60")
+        return f1*60 + f2, t1*60 + t2
+    else
+        error("clk string \"" .. clk .. "\" was no valid clock string")
+    end
+end
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{prepareDays}
+%    \begin{macrocode}
+
+function prepareDays(days)
+    local ret = {}
+    for m in days:gmatch("[^,]+") do
+        table.insert(ret, m)
+    end
+    return ret
+end
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{copyArray}
+%    \begin{macrocode}
+
+function copy_array(obj)
+    if type(obj) ~= 'table' then return obj end
+    local res = {}
+    for k, v in pairs(obj) do
+        local c = copy_array(v)
+        res[copy_array(k)] = c
+    end
+    return res
+end
+%    \end{macrocode}
+% \end{macro}
+% Prepare the module semesterplannerLua for exporting (only the functions
+% that should be public)
+%    \begin{macrocode}
+
+semesterplannerLua = {
+    init = init,
+    addEvent = addEvent,
+    draw = draw
+}
+return semesterplannerLua
+%</luaMain>
+%    \end{macrocode}
+%\Finale
