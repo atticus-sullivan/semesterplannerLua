@@ -1,0 +1,67 @@
+%!TeX program = lualatex
+
+\documentclass[a4paper, 12pt]{scrartcl}
+
+\usepackage{fontspec} % LuaLaTeX
+
+% ----- Packages -----
+\usepackage{scrlayer-scrpage}                 % header and footer
+\usepackage[german=guillemets]{csquotes}      % pick always the right quotation marks
+\usepackage{hyperref}
+
+\usepackage{graphicx}         % include graphics
+
+% ----- Settings -----
+\KOMAoptions{
+	paper=a4,           % set papersize
+	fontsize=12pt,      % set fontsize to 12pt
+	parskip=half,       % half a line will seperate paragraphs
+	headings=normal,    % headings in normalsize
+	BCOR=0cm,           % no space for binding
+	DIV=calc,           % calculare margins automatically, the calculated values can be found in the log file or use \areaset[BCOR]{width}{height} to explicitly specify the textarea
+	twoside=false,      % onesided document
+	twocolumn=false,    % one columned pages
+	% headinclude=false,  % don't count header to satzspiegel
+	% headlines=1.25,     % set number of lines in the header (1.25 for potential seplines)
+	% headheight= <dim>,  % set height of the header manually
+	% headsep=false,      % no sepline for the header (style is to be set with element pagehead)
+	% footlines=1.25,     % set number of lines in the footer (1.25 for potential seplines)
+	% footheight= <dim>,  % set height of the footer manually
+	% footinclude=false,  % don't count footer to satzspiegel
+	% footsep=false,      % no sepline for the footer (style is to be set with element pagefoot)
+	draft=false,         % show additional information
+	numbers=autoendperiod, % automatic punctuation in outline
+}
+
+\usepackage{semesterplanner-lua}
+
+\begin{document}
+
+% \begin{timetable}[days={Mon,Thue,Wend,Thur,Fri}, start time=0, end time=840]
+% 	% \event[time=12:30-13:30, day=Th, offset=0, scale width=0.5]{\unexpanded{\textcolor{white}{lecture2\\lect}}}
+% 	% \event[time=12:30-13:30, day=Th, offset=.5, scale width=0.5]{\unexpanded{\textcolor{white}{lecture2\\lect}}}
+
+% 	\lecture{TestingLectureLongOne}{Heindl}{RN1}{W}{12:30-13:30}{}{}
+% \end{timetable}
+
+\newlength{\timetableWidthI}
+\settowidth{\timetableWidthI}{12:30}
+\addtolength{\timetableWidthI}{2em}
+
+\newlength{\timetableWidthII}
+\setlength{\timetableWidthII}{-\timetableWidthI}
+\addtolength{\timetableWidthII}{1.2\textwidth}
+
+\begin{timetable}[days={Mon,Thue,Wend,Thur,Fri}, end time/.evaluated={21*60}, length=15, width=\timetableWidthII]
+	\lecture    {Software\\Engineering} {−}    {\zoom}  {M}  {08:30-10:00} {\phigh}      {}
+	\tutorial   {Numerik I}             {\tbd} {\teams} {M}  {16:15-17:45} {\pmid}       {}
+	\officehour {Software\\Engineering} {−}    {\zoom}  {T}  {08:30-10:00} {\phigh}      {}
+	\lecture    {Numerik I}             {−}    {\teams} {T}  {10:15-11:45} {\pmid}       {}
+	\meeting    {Tutor Meeting}         {−}    {\teams} {T}  {14:00-15:00} {\phigh}      {}
+	\lecture    {Numerik I}             {−}    {\teams} {Th} {14:15-15:45} {\pmid}       {}
+	\tutorial   {MfN I}                 {−}    {\teams} {F}  {10:15-11:45} {}            {}
+	\seminar    {Machine Learning}      {−}    {\zoom}  {F}  {12:15-13:45} {\pmandatory} {}
+	% \hspace*{-10cm}
+\end{timetable}
+(stolen from \url{https://ctan.org/pkg/semesterplanner})
+\end{document}
