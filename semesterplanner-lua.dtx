@@ -506,11 +506,11 @@ Running "make install" installs the files in the local TeX tree.
 % Initialize global variables to remove previous values (e.g. events from
 % the previous timetable)
 % \begin{description}
-%	\item[|days|] A string with the names of the weekdays for the header
-%	\item[|min|] Time where the timetable should start. If empty this is
-%	calculated from the events.
-%	\item[|max|] Time where the timetable should end. If empty this is
-%	calculated from the events.
+%   \item[|days|] A string with the names of the weekdays for the header
+%   \item[|min|] Time where the timetable should start. If empty this is
+%   calculated from the events.
+%   \item[|max|] Time where the timetable should end. If empty this is
+%   calculated from the events.
 % \end{description}
 %    \begin{macrocode}
 function init(days, min, max)
@@ -521,7 +521,7 @@ function init(days, min, max)
     DAYSE = {"M","T","W","Th","F"}
     MIN = 25*60 -- bigger than any allowed value could be
     MAX = 0
-	MIN_BYPASS = false -- weather min is fixed by the user
+    MIN_BYPASS = false -- weather min is fixed by the user
     MAX_BYPASS = false -- weather max is fixed by the user
 
     if(min == "") then
@@ -550,6 +550,7 @@ function addEvent(opts)
     end
 
     opts.from,opts.to = dur2Int(opts.time)
+    -- TODO convert day to corresponding number
 
     if(not MIN_BYPASS and opts.from < MIN) then MIN = opts.from end
     if(not MAX_BYPASS and opts.to   > MAX) then MAX = opts.to   end
@@ -559,6 +560,9 @@ end
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{draw}
+% Draws the tikz-timetable with the global variables |EVENTS|, |MIN|,
+% |MAX|, |DAYSE| and |DAYS|. In addition |length| and |width| are given as
+% direct parameters.
 %    \begin{macrocode}
 -- parameters are all global variables
 function draw(length, width)
@@ -577,19 +581,52 @@ function draw(length, width)
 
     tex.print([[\begin{tikzpicture}]])
     tex.print([[\tikzset{defStyle/.style={font=\tiny,anchor=north west,fill=blue!50,draw=black,rectangle}}]])
-
+%    \end{macrocode}
+% Draw the grid of the timetable along with clock and day labels
+%    \begin{macrocode}
     -- print the tabular with the weekday headers
-    tex.print(string.format([[\foreach \week [count=\x from 0, evaluate=\x as \y using \x+0.5] in {%s}{ ]], table.concat(days, ",")))
-    tex.print(string.format([[\node[anchor=south] at (\y/%d* %s, 0) {\week};]], #days, textwidth))
-    tex.print(string.format([[\draw (\x/%d * %s, 0cm) -- (\x/%d * %s, %dcm);]], #days, textwidth, #days, textwidth, -length))
+    tex.print(string.format(
+        [[\foreach \week [count=\x from 0, evaluate=\x as \y using \x+0.5] in {%s}{ ]],
+        table.concat(days, ",")
+        )
+    )
+    tex.print(string.format(
+        [[\node[anchor=south] at (\y/%d* %s, 0) {\week};]], #days, textwidth))
+    tex.print(string.format(
+        [[\draw (\x/%d * %s, 0cm) -- (\x/%d * %s, %dcm);]],
+        #days,
+        textwidth,
+        #days,
+        textwidth, -length
+        )
+    )
     tex.print("}")
-    tex.print(string.format([[\draw (%s, 0) -- (%s,%dcm);]], textwidth, textwidth, -length))
+    tex.print(string.format(
+        [[\draw (%s, 0) -- (%s,%dcm);]],
+        textwidth,
+        textwidth,
+        -length
+        )
+    )
 
     for i=minH,maxH do
-        tex.print(string.format([[\node[anchor=east] at (0,%fcm ) {%d:00};]], minuteToFrac(i*60,min,max)*-length, i))
-        tex.print(string.format([[\draw (0,%fcm ) -- (%s,%fcm );]], minuteToFrac(i*60,min,max)*-length, textwidth, minuteToFrac(i*60,min,max)*-length))
+        tex.print(string.format(
+            [[\node[anchor=east] at (0,%fcm ) {%d:00};]],
+            minuteToFrac(i*60,min,max)*-length, i
+            )
+        )
+        tex.print(string.format(
+            [[\draw (0,%fcm ) -- (%s,%fcm );]],
+            minuteToFrac(i*60,min,max)*-length,
+            textwidth,
+            minuteToFrac(i*60,min,max)*-length
+            )
+        )
     end
 
+%    \end{macrocode}
+% Draw the nodes of the events
+%    \begin{macrocode}
     local d
     local red = 0.3333 -- calculated in em from inner sep
     local red_y = 0.25 -- calculated in em
@@ -617,8 +654,9 @@ end
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{searchArray}
+% Searches an array for a given value and returns the index if found. On
+% error |nil| is returned
 %    \begin{macrocode}
-
 function search_array(t, s)
     for k,v in ipairs(t) do
         if(v == s) then return k end
@@ -629,6 +667,8 @@ end
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{minuteToFrac}
+% Calculates at which fraction of the total duration of |max-min| the time
+% |minute| is located
 %    \begin{macrocode}
 function minuteToFrac(minute, min, max)
     return (minute-min)/(max-min)
@@ -636,8 +676,9 @@ end
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{prepareMinMax}
+% Calculates the next hour of |MIN| (next before) and |MAX| (next after)
+% and returns it (the hour) and the corresponding |min|/|max| (same in minutes)
 %    \begin{macrocode}
-
 function prepareMinMax(min, max)
     local minH = math.floor(min/60)
     local maxH = math.ceil(max/60)
@@ -648,8 +689,8 @@ end
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{checkKeys}
+% Checks if all |k|s are present in table |t|
 %    \begin{macrocode}
-
 function checkKeys(t, k)
     for _,x in ipairs(k) do
         if(t[x] == nil) then
@@ -658,10 +699,11 @@ function checkKeys(t, k)
     end
     return true
 end
-
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{dur2Int}
+% Takes a clock duration formatted as |HH:MM-HH:MM|, splits it, checks for
+% validity and returns begin/end time in minutes
 %    \begin{macrocode}
 function dur2Int(clk)
     local f1,f2, t1,t2 = clk:match("^(%d%d?):(%d%d)-(%d%d?):(%d%d)$")
@@ -680,8 +722,8 @@ end
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{prepareDays}
+% Splits the comma-sep string |days| into an array
 %    \begin{macrocode}
-
 function prepareDays(days)
     local ret = {}
     for m in days:gmatch("[^,]+") do
@@ -692,6 +734,7 @@ end
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{copyArray}
+% Returns a copy of the table |obj|
 %    \begin{macrocode}
 
 function copy_array(obj)
