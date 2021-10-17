@@ -13,9 +13,9 @@ $(NAME).pdf: $(NAME).dtx
 	lualatex --recorder --interaction=nonstopmode $(NAME).dtx > /dev/null
 	lualatex --recorder --interaction=nonstopmode $(NAME).dtx > /dev/null
 clean:
-	rm -f $(NAME).{aux,fls,glo,gls,hd,idx,ilg,ind,ins,log,out,toc,lua}
+	rm -f $(NAME).{aux,fls,glo,gls,hd,idx,ilg,ind,ins,log,out,toc}
 distclean: clean
-	rm -f $(NAME).{pdf,sty} README
+	rm -f $(NAME).{pdf,sty,lua} README
 inst: all
 	mkdir -p $(UTREE)/{tex,source,doc}/latex/$(NAME)
 	cp $(NAME).dtx $(UTREE)/source/latex/$(NAME)
