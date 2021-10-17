@@ -188,22 +188,22 @@ Running "make install" installs the files in the local TeX tree.
 % \vspace*{2em}
 %
 % \begin{description}
-% 	\item[|Name|] Give the name of the lecture
-% 	\item[|Lecturer|] Give the name of the lecturer
-% 	\item[|Place|] Give the place of the event (most probably the room or
-% 	an online plattform, see \ref{icons})
-% 	\item[|Day|] The weekday on which the event takes place. Has to be one of
-% 	|M|, |T|, |W|, |Th|, |F| for \textbf{M}onday, \textbf{T}huesday,
-% 	\textbf{W}ednesday, \textbf{Th}ursday, \textbf{F}riday.  Might become
-% 	customizable in a future version.  \item[|Time|] The timespan of the
-% 	event formatted as |HH:MM-HH:MM| (24H clock)
-% 	\item[|Priority|] The priority of the event (see \ref{icons})
-% 	\item[|Event-code|] Free customizable event code. See the documentation
-% 	at the end for keys that can be used here (all keys in |/event|). To
-% 	simply pass arguments to the tikz-node that is being created for the
-% 	event use |tikz/.append={your arguments}| (be careful with |text width|,
-% 	|text height|, |text depth| as these keys are being used for
-% 	the dimensions of the node as well as with |anchor|)
+%   \item[|Name|] Give the name of the lecture
+%   \item[|Lecturer|] Give the name of the lecturer
+%   \item[|Place|] Give the place of the event (most probably the room or
+%   an online plattform, see \ref{icons})
+%   \item[|Day|] The weekday on which the event takes place. Has to be one of
+%   |M|, |T|, |W|, |Th|, |F| for \textbf{M}onday, \textbf{T}huesday,
+%   \textbf{W}ednesday, \textbf{Th}ursday, \textbf{F}riday.  Might become
+%   customizable in a future version.  \item[|Time|] The timespan of the
+%   event formatted as |HH:MM-HH:MM| (24H clock)
+%   \item[|Priority|] The priority of the event (see \ref{icons})
+%   \item[|Event-code|] Free customizable event code. See the documentation
+%   at the end for keys that can be used here (all keys in |/event|). To
+%   simply pass arguments to the tikz-node that is being created for the
+%   event use |tikz/.append={your arguments}| (be careful with |text width|,
+%   |text height|, |text depth| as these keys are being used for
+%   the dimensions of the node as well as with |anchor|)
 % \end{description}
 % The entries |Day| and |Time| are mandatory since they are needed for the
 % positioning of the node. All others are merely necessary for the content
@@ -296,6 +296,91 @@ Running "make install" installs the files in the local TeX tree.
 \definecolor{officehour}{rgb}{0.0, 0.4, 0.6}
 \definecolor{DodgerBlue}{HTML}{1E90FF}
 %    \end{macrocode}
+% \begin{macro}{\semesterplannerLua@encircle}
+% This macro puts a circle arround its argument for better readability. In
+% this package this is used for the fontawesome symbols.
+%    \begin{macrocode}
+    \newcommand*{\semesterplannerLua@encircle}[1]{
+        \begin{minipage}[b][1em][c]{1.5em}
+            \begin{tikzpicture}
+                \node[fill,circle,inner sep=1pt, color = white] {#1};
+            \end{tikzpicture}   
+        \end{minipage}
+    }
+%    \end{macrocode}
+% \end{macro}
+%    Commands for exams
+%   \begin{macro}{\oral}
+%    \begin{macrocode}
+\protected\def\oral{\faComment}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\written}
+%    \begin{macrocode}
+\protected\def\written{\faPencil}
+%    \end{macrocode}
+%   \end{macro}
+%   Commands for symbols of priority
+%   \begin{macro}{\pmandatory}
+%    \begin{macrocode}
+    \protected\def\pmandatory{\semesterplannerLua@encircle{\textcolor{red}{\faWarning}}}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\phigh}
+%    \begin{macrocode}
+    \protected\def\phigh{\semesterplannerLua@encircle{\textcolor{red}{\faFlag}}}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\pmid}
+%    \begin{macrocode}
+    \protected\def\pmid{\semesterplannerLua@encircle{\textcolor{yellow}{\faFlag}}}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\plow}
+%    \begin{macrocode}
+    \protected\def\plow{\semesterplannerLua@encircle{\textcolor{green}{\faFlag}}}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\pnone}
+%    \begin{macrocode}
+    \protected\def\pnone{\semesterplannerLua@encircle{\textcolor{gray}{\faTimesCircle}}}
+%    \end{macrocode}
+%   \end{macro}
+
+%   Commands for online platforms.
+%   \begin{macro}{\teams}
+%    \begin{macrocode}
+    \protected\def\teams{\semesterplannerLua@encircle{\textcolor{DodgerBlue}{\faWindows}}}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\zoom}
+%    \begin{macrocode}
+    \protected\def\zoom{\semesterplannerLua@encircle{\textcolor{DodgerBlue}{\faCamera}}}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\youtube}
+%    \begin{macrocode}
+    \protected\def\youtube{\semesterplannerLua@encircle{\textcolor{red}{\faYoutubePlay}}}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\BBB}
+%    \begin{macrocode}
+    \protected\def\BBB{\semesterplannerLua@encircle{\textcolor{DodgerBlue}{\faBold}}}
+%    \end{macrocode}
+%   \end{macro}
+
+%   Command for "To be determined" and "To be Announced"
+%   \begin{macro}{\tbd}
+%    \begin{macrocode}
+    \protected\def\tbd{\faQuestion}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\tba}
+%    \begin{macrocode}
+    \protected\def\tba{\faBullhorn}
+%    \end{macrocode}
+%   \end{macro}
+
 
 % Load the lua module
 %    \begin{macrocode}
@@ -309,20 +394,8 @@ Running "make install" installs the files in the local TeX tree.
 % of default values) all the macros used are put into the environment.
 %    \begin{macrocode}
 \newenvironment{timetable}[1][]{
+    \section*{\faClockO~Timetable}
 %    \end{macrocode}
-% \begin{macro}{\semesterplannerLua@encircle}
-% This macro puts a circle arround its argument for better readability. In
-% this package this is used for the fontawesome symbols.
-%    \begin{macrocode}
-    \newcommand*{\semesterplannerLua@encircle}[1]{
-        \begin{minipage}[b][1em][c]{1.5em}
-            \begin{tikzpicture}
-                \node[fill,circle,inner sep=1pt, color = white] {##1};
-            \end{tikzpicture}   
-        \end{minipage}
-    }
-%    \end{macrocode}
-% \end{macro}
 %
 % Set all the pgfkeys required for the arguments. To achieve that the
 % defaults are restored every time the environment is used, this is
@@ -410,68 +483,6 @@ Running "make install" installs the files in the local TeX tree.
         offset/.default=0,
     }
 %    \end{macrocode}
-
-%   Commands for symbols of priority
-%   \begin{macro}{\pmandatory}
-%    \begin{macrocode}
-    \protected\def\pmandatory{\semesterplannerLua@encircle{\textcolor{red}{\faWarning}}}
-%    \end{macrocode}
-%   \end{macro}
-%   \begin{macro}{\phigh}
-%    \begin{macrocode}
-    \protected\def\phigh{\semesterplannerLua@encircle{\textcolor{red}{\faFlag}}}
-%    \end{macrocode}
-%   \end{macro}
-%   \begin{macro}{\pmid}
-%    \begin{macrocode}
-    \protected\def\pmid{\semesterplannerLua@encircle{\textcolor{yellow}{\faFlag}}}
-%    \end{macrocode}
-%   \end{macro}
-%   \begin{macro}{\plow}
-%    \begin{macrocode}
-    \protected\def\plow{\semesterplannerLua@encircle{\textcolor{green}{\faFlag}}}
-%    \end{macrocode}
-%   \end{macro}
-%   \begin{macro}{\pnone}
-%    \begin{macrocode}
-    \protected\def\pnone{\semesterplannerLua@encircle{\textcolor{gray}{\faTimesCircle}}}
-%    \end{macrocode}
-%   \end{macro}
-
-%   Commands for online platforms.
-%   \begin{macro}{\teams}
-%    \begin{macrocode}
-    \protected\def\teams{\semesterplannerLua@encircle{\textcolor{DodgerBlue}{\faWindows}}}
-%    \end{macrocode}
-%   \end{macro}
-%   \begin{macro}{\zoom}
-%    \begin{macrocode}
-    \protected\def\zoom{\semesterplannerLua@encircle{\textcolor{DodgerBlue}{\faCamera}}}
-%    \end{macrocode}
-%   \end{macro}
-%   \begin{macro}{\youtube}
-%    \begin{macrocode}
-    \protected\def\youtube{\semesterplannerLua@encircle{\textcolor{red}{\faYoutubePlay}}}
-%    \end{macrocode}
-%   \end{macro}
-%   \begin{macro}{\BBB}
-%    \begin{macrocode}
-    \protected\def\pmandatory{\semesterplannerLua@encircle{\textcolor{red}{\faBold}}}
-%    \end{macrocode}
-%   \end{macro}
-
-%   Command for "To be determined" and "To be Announced"
-%   \begin{macro}{\tbd}
-%    \begin{macrocode}
-    \protected\def\tbd{\faQuestion}
-%    \end{macrocode}
-%   \end{macro}
-%   \begin{macro}{\tba}
-%    \begin{macrocode}
-    \protected\def\tba{\faBullhorn}
-%    \end{macrocode}
-%   \end{macro}
-
 %   Read the argumens given by the user after restoring the defaults
 %   (Restoring currently makes no sense, since they are created a few
 %   lines above anyways, but creation might be moved outside the
@@ -532,7 +543,7 @@ Running "make install" installs the files in the local TeX tree.
 % \end{enumerate}
 %    \begin{macrocode}
     \def\semesterplannerLua@formattedEvent##1##2##3##4##5##6##7##8##9{
-        \semesterplannerLua@event[time=##5, day=##4, tikz={fill=##8}, ##7]
+        \semesterplannerLua@event[time=##5, day=##4, tikz={fill=##8,}, ##7]
         {
             \unexpanded{
                 \textcolor{##9}{
@@ -596,6 +607,34 @@ Running "make install" installs the files in the local TeX tree.
 % \end{environment}
 %
 %    \begin{macrocode}
+\newenvironment{appointments}[1][Room]{
+    \newcommand{\appointment}[7]{\textit{##1}&{##2}&{##3}&{##4}&{##5}&{##6}&{##7}\\}
+    \section*{\faCalendar~Appointments}
+    \begin{tabular}{lllllll}
+        \textbf{Date}&\textbf{Time}&\textbf{Course}&\textbf{Description}&\textbf{#1}&\textbf{Prio.}&\textbf{Note}\\
+}{
+    \end{tabular}
+}
+
+\newenvironment{exams}{
+    \section*{\faStickyNoteO~Exams}
+    \newcommand{\exam}[5]{\textit{##1}&{##2}&{##3}&{##4}&{##5}\\}
+    \begin{tabular}{lllll}
+        \textbf{Date}&\textbf{Time}&\textbf{Course}&\textbf{Type}&\textbf{Note}\\
+}{
+    \end{tabular}
+}
+
+\newenvironment{deadlines}{
+    \section*{\faStickyNoteO~Deadlines}
+    \newcommand{\deadline}[5]{\textit{##1}&{##2}&{##3}&{##4}&{##5}\\}
+    \begin{tabular}{lllll}
+        \textbf{Date}&\textbf{Course}&\textbf{Description}&\textbf{Prio}&\textbf{Note}\\
+}{
+    \end{tabular}
+}
+%    \end{macrocode}
+%    \begin{macrocode}
 %</package>
 %    \end{macrocode}
 
@@ -646,6 +685,8 @@ end
 %    \begin{macrocode}
 -- result are the global variables EVENTS, MIN and MAX
 function addEvent(opts)
+    print("Reading event on line ", tex.inputlineno)
+    opts.inputlineno = tex.inputlineno
     if(not checkKeys(opts, {"time", "day", "content", "tikz"})) then
         error("missing argument")
     end
@@ -668,8 +709,6 @@ end
 %    \begin{macrocode}
 -- parameters are all global variables
 function draw(length, width)
-    print("length", length)
-    print("width", width)
     -- copy relevant variables for working on local copies
     local events = copy_array(EVENTS)
     local days = prepareDays(DAYS)
@@ -736,6 +775,7 @@ function draw(length, width)
         if e.from < max and e.to > min then -- only draw if event is in scope (part of the comp is done in addEvent from < to
             if e.to   > max then e.to   = max end
             if e.from < min then e.from = min end
+            print("Drawing event on line ", e.inputlineno)
             d = search_array(daysE, e.day) - 1
             tex.print(string.format(
                 [[\node[defStyle,text width=-%fem+%f%s/%d, text depth=%fcm-%fem, text height=%fem, %s] at (%f*%s,%fcm) {%s};]],
