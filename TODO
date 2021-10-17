@@ -1,3 +1,5 @@
 % \faClockO
 adjust release date
 code on same page as the demo
+document other envs than timetable
+optional: sort entries in other envs via lua and date/time
