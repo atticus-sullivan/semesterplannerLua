@@ -65,7 +65,12 @@ Running "make install" installs the files in the local TeX tree.
 \usedir{tex/latex/semesterplanner-lua}
 \generate{
   \nopreamble\nopostamble
-  \file{\jobname.lua}{\from{\jobname.dtx}{luaMain}}
+  \file{\jobname-timetable.lua}{\from{\jobname.dtx}{luaTimetable}}
+}
+\usedir{tex/latex/semesterplanner-lua}
+\generate{
+  \nopreamble\nopostamble
+  \file{\jobname-appointment.lua}{\from{\jobname.dtx}{luaApp}}
 }
 %</install>
 %<install>\endbatchfile
@@ -110,9 +115,11 @@ Running "make install" installs the files in the local TeX tree.
     [2021/10/07 v0.2 Semesterplanner package in lua with tikz only]
 
 \RequirePackage{tikz}
+\usetikzlibrary{calendar, positioning, shapes.misc, backgrounds}
 \RequirePackage{pgfkeys}
 \RequirePackage{xcolor}
 \RequirePackage{fontawesome}
+\usepackage{luapackageloader} % use the default lua path as well
 %</package>
 % \fi
 %
@@ -382,9 +389,10 @@ Running "make install" installs the files in the local TeX tree.
 %   \end{macro}
 
 
-% Load the lua module
+% Load the lua modules
 %    \begin{macrocode}
-\directlua{sp = require("semesterplanner-lua.lua")}
+\directlua{sp = require("semesterplanner-lua-timetable.lua")}
+\directlua{app = require("semesterplanner-lua-appointment.lua")}
 %    \end{macrocode}
 %
 % \subsubsection{Local Stuff (timetable-env local)}
@@ -548,7 +556,7 @@ Running "make install" installs the files in the local TeX tree.
             \unexpanded{
                 \textcolor{##9}{
                     \textbf{##1}\\[.2em]
-                    \raggedright{##2}\\[0.5em]\raggedright{##6}\raggedright{##3}
+                    \raggedright{##2}\\[0.5em]\raggedright{##6}\raggedright{##3}\\[0.5em]\raggedright{##5}
                 }
             }
         }
@@ -607,14 +615,27 @@ Running "make install" installs the files in the local TeX tree.
 % \end{environment}
 %
 %    \begin{macrocode}
-\newenvironment{appointments}[1][Room]{
-    \newcommand{\appointment}[7]{\textit{##1}&{##2}&{##3}&{##4}&{##5}&{##6}&{##7}\\}
+\newenvironment{appointments}[2][Room]{
+    \directlua{app.init()}
+    \newcommand{\appointment}[8][]{
+        \directlua{app.addAppointment{date="##2", tikz="##1", period=##8}}
+        \textit{##2}&{##3}&{##4}&{##5}&{##6}&{##7}\\
+    }
     \section*{\faCalendar~Appointments}
-    \begin{tabular}{lllllll}
-        \textbf{Date}&\textbf{Time}&\textbf{Course}&\textbf{Description}&\textbf{#1}&\textbf{Prio.}&\textbf{Note}\\
+    \begin{tabular}{rlllll}
+        \textbf{Date}&\textbf{Time}&\textbf{Course}&\textbf{Description}&\textbf{#1}&\textbf{Prio.}\\
 }{
     \end{tabular}
 }
+%    \end{macrocode}
+% \begin{macro}{printAppointmentCalendar}
+% Print a calendar from startDate to endDate (encoded as YYYY-MM-DD) as
+% one calendar per month in a matrix with the given amount of columns
+%    \begin{macrocode}
+\newcommand{\printAppointmentCalendar}[3][3]{\directlua{app.drawCalendar("#2", "#3", #1)}}
+%    \end{macrocode}
+% \end{macro}
+%    \begin{macrocode}
 
 \newenvironment{exams}{
     \section*{\faStickyNoteO~Exams}
@@ -638,9 +659,9 @@ Running "make install" installs the files in the local TeX tree.
 %</package>
 %    \end{macrocode}
 
-% \subsection{semesterplanner-lua.lua}
+% \subsection{semesterplanner-lua-timetable.lua}
 %    \begin{macrocode}
-%<*luaMain>
+%<*luaTimetable>
 %    \end{macrocode}
 % \begin{macro}{init}
 % Initialize global variables to remove previous values (e.g. events from
@@ -692,7 +713,6 @@ function addEvent(opts)
     end
 
     opts.from,opts.to = dur2Int(opts.time)
-    -- TODO convert day to corresponding number
 
     if(not MIN_BYPASS and opts.from < MIN) then MIN = opts.from end
     if(not MAX_BYPASS and opts.to   > MAX) then MAX = opts.to   end
@@ -904,6 +924,102 @@ semesterplannerLua = {
     draw = draw
 }
 return semesterplannerLua
-%</luaMain>
+%</luaTimetable>
+%    \end{macrocode}
+
+% \subsection{semesterplanner-lua-appointment.lua}
+% TODO how to set the paths right in this case
+% Include the date module for time date calculations
+%    \begin{macrocode}
+%<*luaApp>
+package.path='/usr/share/lua/5.3/?.lua;/usr/share/lua/5.3/?/init.lua;/usr/lib/lua/5.3/?.lua;/usr/lib/lua/5.3/?/init.lua;./?.lua;./?/init.lua;/home/lukas/.luarocks/share/lua/5.3/?.lua;/home/lukas/.luarocks/share/lua/5.3/?/init.lua'
+package.cpath='/usr/lib/lua/5.3/?.so;/usr/lib/lua/5.3/loadall.so;./?.so;/home/lukas/.luarocks/lib/lua/5.3/?.so'
+
+local dateLib = require "date"
+%    \end{macrocode}
+% \begin{macro}{init}
+% Initialize the APPS table as some sort of a reset, takes an argument
+% wethet the reset should be executed (to enable concatenation)
+%    \begin{macrocode}
+function init(date)
+    -- clean up first
+    -- global variable
+    APPS = {}
+end
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{addAppointment}
+% Adds an appointment to the list, stores the date and how the appointment
+% should be highlighted (tikz code for a node)
+%    \begin{macrocode}
+function addAppointment(opts)
+    assert(opts.date ~= nil and opts.tikz ~= nil, "date and tikz has to be given")
+    table.insert(APPS, {date=dateLib(opts.date), tikz=opts.tikz, period=opts.period})
+end
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{drawCalendar}
+% Draw the calendar month by month in a matrix with given columns. The
+% calendar starts and ends at the given dates (in YYYY-MM-DD or any other
+% format the datelib understands)
+%    \begin{macrocode}
+function drawCalendar(minDate, maxDate, cols)
+    minDate = dateLib(minDate)
+    maxDate = dateLib(maxDate)
+    tex.print([[\begin{tikzpicture}[every calendar/.style={inner sep=2pt, week list, month label above centered, month text={\textcolor{red}{\%mt} \%y-}}] ]])
+    tex.print([[\matrix[column sep=1em, row sep=1em]{]])
+        local i = 1
+        running = true
+        while running do
+            -- derive end from start, then check if maxDate is reached
+            endDate = minDate:copy():addmonths(1):setday(1):adddays(-1)
+            if endDate >= maxDate then
+                endDate = maxDate
+                running = false
+            end
+            tex.print(string.format(
+            [[\calendar (%04d-%02d) [dates=%04d-%02d-%02d to %04d-%02d-%02d] if (Sunday) [red] if (Saturday) [red!50!white] if (at least=\year-\month-\day) {} else [nodes={strike out, draw}]; ]],
+                    minDate:getyear(), minDate:getmonth(), minDate:getyear(), minDate:getmonth(), minDate:getday(), endDate:getyear(), endDate:getmonth(), endDate:getday()))
+
+            minDate:addmonths(1)
+            minDate:setday(1)
+
+            if i % cols == 0 or not running then
+                tex.print([[\\]])
+            else
+                tex.print([[&]])
+            end
+            i = i + 1
+        end
+        tex.print([[ }; ]])
+
+%    \end{macrocode}
+% Draw appointment highlighting on a background layer so that the calendar
+% is not overdrawn
+%    \begin{macrocode}
+        tex.print([[\begin{scope}[on background layer] ]])
+        for i,ele in ipairs(APPS) do
+            while ele.date <= maxDate do
+                tex.print(string.format([[\node[fill opacity=.5,fill=red,circle,text width=3ex,inner sep=0mm, %s] at (%04d-%02d-%04d-%02d-%02d) {};]],
+                    ele.tikz, ele.date:getyear(), ele.date:getmonth(), ele.date:getyear(), ele.date:getmonth(), ele.date:getday()))
+                if ele.period == nil then break end
+                ele.date:adddays(ele.period)
+            end
+        end
+        tex.print([[\end{scope}]])
+    tex.print([[\end{tikzpicture}]])
+end
+%    \end{macrocode}
+% \end{macro}
+% Prepare the module for exporting (only the functions that should be public)
+%    \begin{macrocode}
+
+semesterplannerLuaApp = {
+    init = init,
+    addAppointment = addAppointment,
+    drawCalendar = drawCalendar,
+}
+return semesterplannerLuaApp
+%</luaApp>
 %    \end{macrocode}
 %\Finale
