@@ -53,14 +53,14 @@
 \addtolength{\timetableWidthII}{1.2\textwidth}
 
 \begin{timetable}[days={Mon,Thue,Wend,Thur,Fri}, end time/.evaluated={21*60}, length=15, width=\timetableWidthII]
-	\lecture    {Software\\Engineering} {−}    {\zoom}  {M}  {08:30-10:00} {\phigh}      {}
-	\tutorial   {Numerik I}             {\tbd} {\teams} {M}  {16:15-17:45} {\pmid}       {}
-	\officehour {Software\\Engineering} {−}    {\zoom}  {T}  {08:30-10:00} {\phigh}      {}
-	\lecture    {Numerik I}             {−}    {\teams} {T}  {10:15-11:45} {\pmid}       {}
-	\meeting    {Tutor Meeting}         {−}    {\teams} {T}  {14:00-15:00} {\phigh}      {}
-	\lecture    {Numerik I}             {−}    {\teams} {Th} {14:15-15:45} {\pmid}       {}
-	\tutorial   {MfN I}                 {−}    {\teams} {F}  {10:15-11:45} {}            {}
-	\seminar    {Machine Learning}      {−}    {\zoom}  {F}  {12:15-13:45} {\pmandatory} {}
+	\lecture[title={Software\\Engineering}, speaker={-}, location={\zoom}, day={M}, time={08:30-10:00}, prio={\phigh}]
+	\tutorial[title={Numerik I}, speaker={\tbd}, location={\teams}, day={M}, time={16:15-17:45}, prio={\pmid}]
+	\officehour[title={Software\\Engineering}, speaker={−}, location={\zoom}, day={T}, time={08:30-10:00}, prio={\phigh}]
+	\lecture[title={Numerik I}, speaker={−}, location={\teams}, day={T}, time={10:15-11:45}, prio={\pmid}]
+	\meeting[title={Tutor Meeting}, speaker={−}, location={\teams}, day={T}, time={14:00-15:00}, prio={\phigh}]
+	\lecture [title={Numerik I}             ,speaker={−}    ,location={\teams}, day={Th} ,time={14:15-15:45}, prio={\pmid}]
+	\tutorial[title={MfN I}                 ,speaker={−}    ,location={\teams},  day={F} ,time= {10:15-11:45}]
+	\seminar [title={Machine Learning}      ,speaker={−}    ,location={\zoom},   day={F} ,time= {12:15-13:45}, prio={\pmandatory}]
 	% \hspace*{-10cm}
 \end{timetable}
 (stolen from \url{https://ctan.org/pkg/semesterplanner})
@@ -73,10 +73,10 @@
 	\exam{\today}{11:00-12:00}{Seminar}{written}{NoteBy}
 \end{exams}
 
-\begin{appointments}{true}
-	\appointment[fill=brown]{2021-10-20}{11:00-12:00}{Seminar}{Kickoff}{\zoom}{\pmandatory}{nil}
-\end{appointments}
+% \begin{appointments}{true}
+% 	\appointment[fill=brown]{2021-10-20}{11:00-12:00}{Seminar}{Kickoff}{\zoom}{\pmandatory}{nil}
+% \end{appointments}
 
-\printAppointmentCalendar{2021-10-01}{2022-03-31}
+% \printAppointmentCalendar{2021-10-01}{2022-03-31}
 
 \end{document}

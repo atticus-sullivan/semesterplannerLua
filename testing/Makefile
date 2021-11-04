@@ -1,6 +1,6 @@
 .PHONY: clean
 
-master.pdf: master.tex semesterplanner-lua.sty semesterplanner-lua-appointment.lua semesterplanner-lua-timetable.lua tex-aux
+master.pdf: master.tex semesterplanner-lua.sty semesterplanner-lua-calendar.lua semesterplanner-lua-timetable.lua tex-aux
 	test -d tex-aux # check if tex-aux is really a directory
 	cluttex --output-directory=tex-aux -e lualatex master.tex
 
@@ -9,8 +9,8 @@ semesterplanner-lua.sty:
 
 semesterplanner-lua-timetable.lua:
 	cp ../semesterplanner-lua-timetable.lua ./
-semesterplanner-lua-appointment.lua:
-	cp ../semesterplanner-lua-appointment.lua ./
+semesterplanner-lua-calendar.lua:
+	cp ../semesterplanner-lua-calendar.lua ./
 
 tex-aux:
 	mkdir tex-aux

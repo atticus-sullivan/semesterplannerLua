@@ -3,8 +3,7 @@ code on same page as the demo
 document other envs than timetable
 
 TODO:
-- consider making key value commands (in general for this package) ???
-- what if the periodic appointment has to be paused (holidays)
-- how to end the periodic appointment
 - make this not only for appointments but for deadlines as well
-- draw dot with right color in the table as some sort of legend
+
+appointments -> calendar in terms of pgfkeys
+appointments -> start date should be simply date (maybe the user has no periodic event, start date would only confuse)
