@@ -1,9 +1,3 @@
 adjust release date
 code on same page as the demo
 document other envs than timetable
-
-TODO:
-- make this not only for appointments but for deadlines as well
-
-appointments -> calendar in terms of pgfkeys
-appointments -> start date should be simply date (maybe the user has no periodic event, start date would only confuse)

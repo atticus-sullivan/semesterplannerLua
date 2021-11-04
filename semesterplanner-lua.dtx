@@ -424,18 +424,13 @@ Running "make install" installs the files in the local TeX tree.
 % \end{description}
 %    \begin{macrocode}
         /semesterplanner-lua/timetable/env/.cd,
-        days/.initial={Mon,Thue,Wend,Thur,Fri},
-        days/.default={Mon,Thue,Wend,Thur,Fri},
+        days/.initial={Mon,Thue,Wend,Thur,Fri}, days/.default={Mon,Thue,Wend,Thur,Fri},
         %
-        start time/.initial=,
-        start time/.default=,
-        end time/.initial=,
-        end time/.default=,
+        start time/.initial=, start time/.default=,
+        end time/.initial=, end time/.default=,
         %
-        width/.initial=\textwidth,
-        width/.default=\textwidth,
-        length/.initial=10,
-        length/.default=10,
+        width/.initial=\textwidth, width/.default=\textwidth,
+        length/.initial=10, length/.default=10,
         %
 %    \end{macrocode}
 % |timetable/event/|:
@@ -466,29 +461,24 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
         /semesterplanner-lua/timetable/event/.cd,
         % event arguments
-        content/.initial=,
-        content/.default=,
+        content/.initial=, content/.default=,
         %
-        time/.initial=,
-        time/.default=,
-        day/.initial=,
-        day/.default=,
+        time/.initial=, time/.default=,
+        day/.initial=, day/.default=,
         %
-        tikz/.initial=,
-        tikz/.default=,
-        scale width/.initial=1,
-        scale width/.default=1,
-        offset/.initial=0,
-        offset/.default=0,
+        tikz/.initial=, tikz/.default=,
+        scale width/.initial=1, scale width/.default=1,
+        offset/.initial=0, offset/.default=0,
         %
-        textcolor/.initial=,
-        title/.initial=,
-        speaker/.initial=,
-        location/.initial=,
-        prio/.initial=,
-        formatter/.initial=timetableformatter,
+        textcolor/.initial=, textcolor/.default=,
+        title/.initial=, title/.default=,
+        speaker/.initial=, speaker/.default=,
+        location/.initial=, location/.default=,
+        prio/.initial=, prio/.default=,
+        formatter/.initial=timetableformatter, formatter/.default=timetableformatter,
+        %
 %    \end{macrocode}
-% |appointments/|:
+% |calendar/|:
 % \begin{description}
 %   \item[|draw|] 
 %   \item[|room|] 
@@ -501,14 +491,15 @@ Running "make install" installs the files in the local TeX tree.
 %   \item[|period|] 
 % \end{description}
 %    \begin{macrocode}
-        /semesterplanner-lua/appointments/.cd,
+        /semesterplanner-lua/calendar/.cd,
         draw/.initial={true}, draw/.default={true},
         room/.initial={}, room/.default={},
         time/.initial={}, time/.default={},
         prio/.initial={}, prio/.default={},
         course/.initial={}, course/.default={},
         desc/.initial={}, desc/.default={},
-        start/.initial={}, start/.default={},
+        type/.initial={}, type/.default={},
+        date/.initial={}, date/.default={},
         end/.initial={}, end/.default={},
         tikz/.initial={}, tikz/.default={},
         period/.initial={nil}, period/.default={nil},
@@ -532,7 +523,7 @@ Running "make install" installs the files in the local TeX tree.
 %   Afterwards the lua module is beeing initialized (erase data from
 %   possible previous runs.
 %    \begin{macrocode}
-    \pgfkeys{/semesterplanner-lua/timetable/env/.cd, days,length,width,start time,end time, #1}
+    \pgfkeys{/semesterplanner-lua/timetable/env/.cd, days,start time,end time, width,length, #1}
     \directlua{sp.init(
         "\pgfkeysvalueof{/semesterplanner-lua/timetable/env/days}",
         "\pgfkeysvalueof{/semesterplanner-lua/timetable/env/start time}",
@@ -547,8 +538,8 @@ Running "make install" installs the files in the local TeX tree.
 % this is passed to lua which in turn will pass it unmodified back)
 %    \begin{macrocode}
     \newcommand{\semesterplannerLua@event}[1][]{
-        \pgfkeys{/semesterplanner-lua/timetable/event/.cd,content,time,day,tikz,scale width,
-        offset, ##1}
+        \pgfkeys{/semesterplanner-lua/timetable/event/.cd,content,time,day,tikz,scale
+		width,offset,textcolor,title,speaker,location,prio,formatter, ##1}
         \directlua{
             sp.addEvent{
                 time="\pgfkeysvalueof{/semesterplanner-lua/timetable/event/time}",
@@ -619,35 +610,7 @@ Running "make install" installs the files in the local TeX tree.
 % \end{environment}
 %
 %    \begin{macrocode}
-\newenvironment{appointments}[2][Room]{
-    \directlua{cal.init(#2)}
-    \newcommand{\appointment}[6]{
-        \textit{##1} & {##2} & {##3} & {##4} & {##5} & {##6}\\
-    }
-    \newcommand{\appointmentPlus}[1][]{
-        \pgfkeys{/semesterplanner-lua/appointments/.cd, ##1}
-        \directlua{
-            cal.addEvent
-            {
-                draw=\pgfkeysvalueof{/semesterplanner-lua/appointments/draw},
-                room=[[\pgfkeysvalueof{/semesterplanner-lua/appointments/room}]],
-                time=[[\pgfkeysvalueof{/semesterplanner-lua/appointments/time}]],
-                prio=[[\pgfkeysvalueof{/semesterplanner-lua/appointments/prio}]],
-                course=[[\pgfkeysvalueof{/semesterplanner-lua/appointments/course}]],
-                desc=[[\pgfkeysvalueof{/semesterplanner-lua/appointments/desc}]],
-                date=[[\pgfkeysvalueof{/semesterplanner-lua/appointments/start}]],
-                endDate=[[\pgfkeysvalueof{/semesterplanner-lua/appointments/end}]],
-                tikz=[[\pgfkeysvalueof{/semesterplanner-lua/appointments/tikz}]],
-                period=\pgfkeysvalueof{/semesterplanner-lua/appointments/period}
-            }
-        }
-    }
-    \section*{\faCalendar~Appointments}
-    \begin{tabular}{rlllll}
-        \textbf{Date}&\textbf{Time}&\textbf{Course}&\textbf{Description}&\textbf{#1}&\textbf{Prio.}\\
-}{
-    \end{tabular}
-}
+
 %    \end{macrocode}
 % \begin{macro}{printSpCalendar}
 % Print a calendar from startDate to endDate (encoded as YYYY-MM-DD) as
@@ -658,20 +621,77 @@ Running "make install" installs the files in the local TeX tree.
 % \end{macro}
 %    \begin{macrocode}
 
-\newenvironment{exams}{
+\newenvironment{appointments}[2][Room]{
+    \directlua{cal.init(#2)}
+    \newcommand{\appointment}[1][]{
+        \pgfkeys{/semesterplanner-lua/calendar/.cd,draw,room,time,prio,course,desc,date,end,tikz,period,type, ##1}
+        \directlua{
+            cal.addAppointment
+            {
+                draw=\pgfkeysvalueof{/semesterplanner-lua/calendar/draw},
+                room=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/room}]],
+                time=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/time}]],
+                prio=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/prio}]],
+                course=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/course}]],
+                desc=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/desc}]],
+                date=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/date}]],
+                endDate=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/end}]],
+                tikz=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/tikz}]],
+                period=\pgfkeysvalueof{/semesterplanner-lua/calendar/period}
+            }
+        }
+    }
+    \section*{\faCalendar~Appointments}
+    \begin{tabular}{rlllll}
+        \textbf{Date}&\textbf{Time}&\textbf{Course}&\textbf{Description}&\textbf{#1}&\textbf{Prio.}\\
+}{
+    \end{tabular}
+}
+
+\newenvironment{exams}[1]{
+    \directlua{cal.init(#1)}
+    \newcommand{\exam}[1][]{
+        \pgfkeys{/semesterplanner-lua/calendar/.cd,draw,room,time,prio,course,desc,date,end,tikz,period,type, ##1}
+        \directlua{
+            cal.addExam
+            {
+                draw=\pgfkeysvalueof{/semesterplanner-lua/calendar/draw},
+                room=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/room}]],
+                time=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/time}]],
+                course=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/course}]],
+                desc=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/desc}]],
+                date=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/date}]],
+                tikz=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/tikz}]],
+                type=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/type}]],
+            }
+        }
+    }
     \section*{\faStickyNoteO~Exams}
-    \newcommand{\exam}[5]{\textit{##1}&{##2}&{##3}&{##4}&{##5}\\}
-    \begin{tabular}{lllll}
+    \begin{tabular}{rllll}
         \textbf{Date}&\textbf{Time}&\textbf{Course}&\textbf{Type}&\textbf{Note}\\
 }{
     \end{tabular}
 }
 
-\newenvironment{deadlines}{
+\newenvironment{deadlines}[1]{
+    \directlua{cal.init(#1)}
+    \newcommand{\deadline}[1][]{
+        \pgfkeys{/semesterplanner-lua/calendar/.cd,draw,room,time,prio,course,desc,date,end,tikz,period,type, ##1}
+        \directlua{
+            cal.addDeadline
+            {
+                draw=\pgfkeysvalueof{/semesterplanner-lua/calendar/draw},
+                course=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/course}]],
+                desc=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/desc}]],
+                date=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/date}]],
+                tikz=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/tikz}]],
+                prio=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/prio}]],
+            }
+        }
+    }
     \section*{\faStickyNoteO~Deadlines}
-    \newcommand{\deadline}[5]{\textit{##1}&{##2}&{##3}&{##4}&{##5}\\}
-    \begin{tabular}{lllll}
-        \textbf{Date}&\textbf{Course}&\textbf{Description}&\textbf{Prio}&\textbf{Note}\\
+    \begin{tabular}{rlll}
+        \textbf{Date}&\textbf{Course}&\textbf{Description}&\textbf{Prio}\\
 }{
     \end{tabular}
 }
@@ -987,11 +1007,22 @@ local dateLib = require "date"
 % Initialize the EVENTS table as some sort of a reset, takes an argument
 % wethet the reset should be executed (to enable concatenation)
 %    \begin{macrocode}
-function init(date)
+function init(clear)
     -- clean up first
     -- global variable
-    EVENTS = {}
+    if clear then
+        EVENTS = {}
+    end
 end
+
+function genDot(opts)
+    dot = ""
+    if opts.draw then
+        dot = string.format([[\tikz[baseline=(X.base)]\node (X) [fill opacity=.5,fill=red,circle,inner sep=0mm, %s] {\phantom{D}};]], opts.tikz)
+    end
+    return dot
+end
+
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{addEvent}
@@ -999,7 +1030,6 @@ end
 % should be highlighted (tikz code for a node)
 %    \begin{macrocode}
 function addEvent(opts)
-    dot = ""
     if opts.draw then
         assert(opts.date ~= nil and opts.tikz ~= nil, "date and tikz has to be given")
         if opts.endDate == nil or opts.endDate == '' then
@@ -1007,9 +1037,25 @@ function addEvent(opts)
         else
             table.insert(EVENTS, {date=dateLib(opts.date), tikz=opts.tikz, period=opts.period, endDate=dateLib(opts.endDate)})
         end
-        dot = string.format([[\tikz[baseline=(X.base)]\node (X) [fill opacity=.5,fill=red,circle,inner sep=0mm, %s] {\phantom{D}};]], opts.tikz)
     end
-    tex.print(string.format([[ \textit{%s} & %s & %s%s & %s & %s \\]], opts.date, opts.time, dot, opts.course, opts.desc, opts.room, opts.prio))
+end
+
+function addAppointment(opts)
+    addEvent(opts)
+    dot = genDot(opts)
+    tex.print(string.format([[ \textit{%s} & %s & %s%s & %s & %s & %s\\]], opts.date, opts.time, dot, opts.course, opts.desc, opts.room, opts.prio))
+end
+
+function addExam(opts)
+    addEvent(opts)
+    dot = genDot(opts)
+    tex.print(string.format([[ \textit{%s} & %s & %s%s & %s & %s \\]], opts.date, opts.time, dot, opts.course, opts.type, opts.desc))
+end
+
+function addDeadline(opts)
+    addEvent(opts)
+    dot = genDot(opts)
+    tex.print(string.format([[ \textit{%s} & %s%s & %s & %s \\]], opts.date, dot, opts.course, opts.desc, opts.prio))
 end
 %    \end{macrocode}
 % \end{macro}
@@ -1018,6 +1064,7 @@ end
 % calendar starts and ends at the given dates (in YYYY-MM-DD or any other
 % format the datelib understands)
 %    \begin{macrocode}
+
 function drawCalendar(minDate, maxDate, cols)
     minDate = dateLib(minDate)
     maxDate = dateLib(maxDate)
@@ -1082,7 +1129,9 @@ end
 
 semesterplannerLuaCal = {
     init = init,
-    addEvent = addEvent,
+    addAppointment = addAppointment,
+    addDeadline = addDeadline,
+    addExam = addExam,
     drawCalendar = drawCalendar,
 }
 return semesterplannerLuaCal
