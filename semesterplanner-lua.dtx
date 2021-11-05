@@ -489,6 +489,10 @@ Running "make install" installs the files in the local TeX tree.
 %   \item[|end|] 
 %   \item[|tikz|] 
 %   \item[|period|] 
+%   \item[|shift|] 
+%   \item[|print|] Only makes sence if the command is suffixed by a |%|
+%       otherwise somehow a space gets inserted (eventhough the |%| is
+%       inserted from lua as well
 % \end{description}
 %    \begin{macrocode}
         /semesterplanner-lua/calendar/.cd,
@@ -503,6 +507,8 @@ Running "make install" installs the files in the local TeX tree.
         end/.initial={}, end/.default={},
         tikz/.initial={}, tikz/.default={},
         period/.initial={nil}, period/.default={nil},
+        shift/.initial={true}, shift/.default={true},
+        print/.initial={true}, print/.default={true},
     }
 %    \end{macrocode}
 %
@@ -623,24 +629,21 @@ Running "make install" installs the files in the local TeX tree.
 
 \newenvironment{appointments}[2][Room]{
     \directlua{cal.init(#2)}
-    \newcommand{\appointment}[1][]{
-        \pgfkeys{/semesterplanner-lua/calendar/.cd,draw,room,time,prio,course,desc,date,end,tikz,period,type, ##1}
-        \directlua{
-            cal.addAppointment
-            {
-                draw=\pgfkeysvalueof{/semesterplanner-lua/calendar/draw},
-                room=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/room}]],
-                time=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/time}]],
-                prio=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/prio}]],
-                course=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/course}]],
-                desc=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/desc}]],
-                date=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/date}]],
-                endDate=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/end}]],
-                tikz=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/tikz}]],
-                period=\pgfkeysvalueof{/semesterplanner-lua/calendar/period}
-            }
-        }
-    }
+    \newcommand{\appointment}[1][]{%
+		\pgfkeys{/semesterplanner-lua/calendar/.cd,draw,room,time,prio,course,desc,date,end,tikz,period,type,shift,print, ##1}%
+		\directlua{
+			cal.addAppointment{draw=\pgfkeysvalueof{/semesterplanner-lua/calendar/draw},
+			room=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/room}]],
+			time=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/time}]],
+			prio=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/prio}]],
+			course=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/course}]],
+			desc=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/desc}]],
+			date=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/date}]],
+			endDate=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/end}]],
+			tikz=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/tikz}]],
+			period=\pgfkeysvalueof{/semesterplanner-lua/calendar/period},
+			shift=\pgfkeysvalueof{/semesterplanner-lua/calendar/shift},
+			print=\pgfkeysvalueof{/semesterplanner-lua/calendar/print}}}}
     \section*{\faCalendar~Appointments}
     \begin{tabular}{rlllll}
         \textbf{Date}&\textbf{Time}&\textbf{Course}&\textbf{Description}&\textbf{#1}&\textbf{Prio.}\\
@@ -650,11 +653,10 @@ Running "make install" installs the files in the local TeX tree.
 
 \newenvironment{exams}[1]{
     \directlua{cal.init(#1)}
-    \newcommand{\exam}[1][]{
-        \pgfkeys{/semesterplanner-lua/calendar/.cd,draw,room,time,prio,course,desc,date,end,tikz,period,type, ##1}
+    \newcommand{\exam}[1][]{%
+        \pgfkeys{/semesterplanner-lua/calendar/.cd,draw,room,time,prio,course,desc,date,end,tikz,period,type,shift,print, ##1}%
         \directlua{
-            cal.addExam
-            {
+            cal.addExam{
                 draw=\pgfkeysvalueof{/semesterplanner-lua/calendar/draw},
                 room=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/room}]],
                 time=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/time}]],
@@ -663,9 +665,8 @@ Running "make install" installs the files in the local TeX tree.
                 date=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/date}]],
                 tikz=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/tikz}]],
                 type=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/type}]],
-            }
-        }
-    }
+                shift=\pgfkeysvalueof{/semesterplanner-lua/calendar/shift},
+                print=\pgfkeysvalueof{/semesterplanner-lua/calendar/print}}}}
     \section*{\faStickyNoteO~Exams}
     \begin{tabular}{rllll}
         \textbf{Date}&\textbf{Time}&\textbf{Course}&\textbf{Type}&\textbf{Note}\\
@@ -675,20 +676,18 @@ Running "make install" installs the files in the local TeX tree.
 
 \newenvironment{deadlines}[1]{
     \directlua{cal.init(#1)}
-    \newcommand{\deadline}[1][]{
-        \pgfkeys{/semesterplanner-lua/calendar/.cd,draw,room,time,prio,course,desc,date,end,tikz,period,type, ##1}
+    \newcommand{\deadline}[1][]{%
+        \pgfkeys{/semesterplanner-lua/calendar/.cd,draw,room,time,prio,course,desc,date,end,tikz,period,type,shift,print, ##1}%
         \directlua{
-            cal.addDeadline
-            {
+            cal.addDeadline{
                 draw=\pgfkeysvalueof{/semesterplanner-lua/calendar/draw},
                 course=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/course}]],
                 desc=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/desc}]],
                 date=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/date}]],
                 tikz=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/tikz}]],
                 prio=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/prio}]],
-            }
-        }
-    }
+                shift=\pgfkeysvalueof{/semesterplanner-lua/calendar/shift},
+                print=\pgfkeysvalueof{/semesterplanner-lua/calendar/print}}}}
     \section*{\faStickyNoteO~Deadlines}
     \begin{tabular}{rlll}
         \textbf{Date}&\textbf{Course}&\textbf{Description}&\textbf{Prio}\\
@@ -1015,6 +1014,13 @@ function init(clear)
     end
 end
 
+text = {
+    print = function(s)
+        -- print("\"" .. s .. "\"")
+        tex.print(s)
+    end
+}
+
 function genDot(opts)
     dot = ""
     if opts.draw then
@@ -1035,9 +1041,9 @@ function addEvent(opts)
     if opts.draw then
         assert(opts.date ~= nil and opts.tikz ~= nil, "date and tikz has to be given")
         if opts.endDate == nil or opts.endDate == '' then
-            table.insert(EVENTS, {date=dateLib(opts.date), tikz=opts.tikz, period=opts.period, endDate=nil, inputlineno=opts.inputlineno})
+            table.insert(EVENTS, {shift=opts.shift,date=dateLib(opts.date), tikz=opts.tikz, period=opts.period, endDate=nil, inputlineno=opts.inputlineno})
         else
-            table.insert(EVENTS, {date=dateLib(opts.date), tikz=opts.tikz, period=opts.period, endDate=dateLib(opts.endDate), inputlineno=opts.inputlineno})
+            table.insert(EVENTS, {shift=opts.shift,date=dateLib(opts.date), tikz=opts.tikz, period=opts.period, endDate=dateLib(opts.endDate), inputlineno=opts.inputlineno})
         end
     end
 end
@@ -1045,19 +1051,31 @@ end
 function addAppointment(opts)
     addEvent(opts)
     dot = genDot(opts)
-    tex.print(string.format([[ \textit{%s} & %s & %s%s & %s & %s & %s\\]], opts.date, opts.time, dot, opts.course, opts.desc, opts.room, opts.prio))
+    if opts.print then
+        tex.sprint(string.format([[\textit{%s} & %s & %s%s & %s & %s & %s\\]], opts.date, opts.time, dot, opts.course, opts.desc, opts.room, opts.prio))
+    else
+        tex.sprint("%")
+    end
 end
 
 function addExam(opts)
     addEvent(opts)
     dot = genDot(opts)
-    tex.print(string.format([[ \textit{%s} & %s & %s%s & %s & %s \\]], opts.date, opts.time, dot, opts.course, opts.type, opts.desc))
+    if opts.print then
+        tex.sprint(string.format([[\textit{%s} & %s & %s%s & %s & %s \\]], opts.date, opts.time, dot, opts.course, opts.type, opts.desc))
+    else
+        tex.sprint("%")
+    end
 end
 
 function addDeadline(opts)
     addEvent(opts)
     dot = genDot(opts)
-    tex.print(string.format([[ \textit{%s} & %s%s & %s & %s \\]], opts.date, dot, opts.course, opts.desc, opts.prio))
+    if opts.print then
+        tex.sprint(string.format([[\textit{%s} & %s%s & %s & %s \\]], opts.date, dot, opts.course, opts.desc, opts.prio))
+    else
+        tex.sprint("%")
+    end
 end
 %    \end{macrocode}
 % \end{macro}
@@ -1070,8 +1088,8 @@ end
 function drawCalendar(minDate, maxDate, cols)
     minDate = dateLib(minDate)
     maxDate = dateLib(maxDate)
-    tex.print([[\begin{tikzpicture}[every calendar/.style={inner sep=2pt, week list, month label above centered, month text={\textcolor{red}{\%mt} \%y-}}] ]])
-    tex.print([[\matrix[column sep=1em, row sep=1em]{]])
+    text.print([[\begin{tikzpicture}[every calendar/.style={inner sep=2pt, week list, month label above centered, month text={\textcolor{red}{\%mt} \%y-}}] ]])
+    text.print([[\matrix[column sep=1em, row sep=1em]{]])
         local i = 1
         running = true
         while running do
@@ -1081,7 +1099,7 @@ function drawCalendar(minDate, maxDate, cols)
                 endDate = maxDate
                 running = false
             end
-            tex.print(string.format(
+            text.print(string.format(
             [[\calendar (%04d-%02d) [dates=%04d-%02d-%02d to %04d-%02d-%02d] if (Sunday) [red] if (Saturday) [red!50!white] if (equals=\year-\month-\day) [nodes={inner sep=.4em,rectangle,line width=1pt,draw}] if (at least=\year-\month-\day) {} else [nodes={strike out, draw}]; ]],
                     minDate:getyear(), minDate:getmonth(), minDate:getyear(), minDate:getmonth(), minDate:getday(), endDate:getyear(), endDate:getmonth(), endDate:getday()))
 
@@ -1089,41 +1107,43 @@ function drawCalendar(minDate, maxDate, cols)
             minDate:setday(1)
 
             if i % cols == 0 or not running then
-                tex.print([[\\]])
+                text.print([[\\]])
             else
-                tex.print([[&]])
+                text.print([[&]])
             end
             i = i + 1
         end
-        tex.print([[ }; ]])
+        text.print([[ }; ]])
 
 %    \end{macrocode}
 % Draw highlighting on a background layer so that the calendar
 % is not overdrawn
 %    \begin{macrocode}
         local usedDates = {}
-        tex.print([[\begin{scope}[on background layer] ]])
+        text.print([[\begin{scope}[on background layer] ]])
         for i,ele in ipairs(EVENTS) do
             print(string.format("Drawing item from line %d", ele.inputlineno))
             while ele.date <= maxDate and (ele.endDate == nil or ele.date <= ele.endDate) do
                 local xshift = 0
-                if usedDates[tostring(ele.date)] ~= nil then
-                    xshift = math.ceil(usedDates[tostring(ele.date)] / 2)
-                    if usedDates[tostring(ele.date)] % 2 == 0 then
-                        xshift = -xshift
+                if ele.shift then
+                    if usedDates[tostring(ele.date)] ~= nil then
+                        xshift = math.ceil(usedDates[tostring(ele.date)] / 2)
+                        if usedDates[tostring(ele.date)] % 2 == 0 then
+                            xshift = -xshift
+                        end
+                        usedDates[tostring(ele.date)] = usedDates[tostring(ele.date)] + 1
+                    else
+                        usedDates[tostring(ele.date)] = 1
                     end
-                    usedDates[tostring(ele.date)] = usedDates[tostring(ele.date)] + 1
-                else
-                    usedDates[tostring(ele.date)] = 1
                 end
-                tex.print(string.format([[\node[xshift=%d mm, fill opacity=.5,fill=red,circle,text width=3ex,inner sep=0mm, %s] at (%04d-%02d-%04d-%02d-%02d) {};]],
+                text.print(string.format([[\node[xshift=%d mm, fill opacity=.5,fill=red,circle,text width=0ex,inner sep=1.1ex, %s] at (%04d-%02d-%04d-%02d-%02d) {};]],
                     xshift, ele.tikz, ele.date:getyear(), ele.date:getmonth(), ele.date:getyear(), ele.date:getmonth(), ele.date:getday()))
                 if ele.period == nil then break end
                 ele.date:adddays(ele.period)
             end
         end
-        tex.print([[\end{scope}]])
-    tex.print([[\end{tikzpicture}]])
+        text.print([[\end{scope}]])
+    text.print([[\end{tikzpicture}]])
 end
 %    \end{macrocode}
 % \end{macro}

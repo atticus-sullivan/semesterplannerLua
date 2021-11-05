@@ -1,3 +1,5 @@
 adjust release date
 code on same page as the demo
 document other envs than timetable
+
+state lua package date as prerequisite or bundle with the package
