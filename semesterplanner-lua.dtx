@@ -1132,8 +1132,6 @@ function drawCalendar(minDate, maxDate, cols)
             end
             text.print(string.format(
             [[\calendar (%04d-%02d) [dates=%04d-%02d-%02d to %04d-%02d-%02d] if (Sunday) [red] if (Saturday) [red!50!white] if (equals=\year-\month-\day) [nodes={inner sep=.25em,rectangle,line width=1pt,draw}] if (at least=\year-\month-\day) {} else [nodes={strike out, draw}]; ]],
-			%04d-%02d-%02d] if (Sunday) [red] if (Saturday) [red!50!white]
-			if (equals=\year-\month-\day) [nodes={inner sep=.25em,rectangle,line width=1pt,draw}] if (at least=\year-\month-\day) {} else [nodes={strike out, draw}]; ]],
                     minDate:getyear(), minDate:getmonth(), minDate:getyear(), minDate:getmonth(), minDate:getday(), endDate:getyear(), endDate:getmonth(), endDate:getday()))
 
             minDate:addmonths(1)
