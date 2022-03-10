@@ -512,6 +512,26 @@ Running "make install" installs the files in the local TeX tree.
     }
 %    \end{macrocode}
 %
+% \subsection{Tikz Calendar add weekday labels}
+%    \begin{macrocode}
+\tikzoption{day headings}{\tikzstyle{day heading}=[#1]}
+\tikzstyle{day heading}=[]
+\tikzstyle{day letter headings}=[
+    execute before day scope={ \ifdate{day of month=1}{%
+      \pgfmathsetlength{\pgf@ya}{\tikz@lib@cal@yshift}%
+      \pgfmathsetlength\pgf@xa{\tikz@lib@cal@xshift}%
+      \pgftransformyshift{-\pgf@ya}
+      \foreach \d/\l in {0/M,1/T,2/W,3/T,4/F,5/S,6/S} {
+        \pgf@xa=\d\pgf@xa%
+        \pgftransformxshift{\pgf@xa}%
+        \pgftransformyshift{\pgf@ya}%
+        \node[every day,day heading]{\l};%
+      } 
+    }{}%
+  }%
+]
+%    \end{macrocode}
+%
 % \subsubsection{Local Stuff (timetable-env local)}
 % \begin{environment}{timetable}
 % This is the environment doing all the stuff. To gate the positions where
@@ -545,7 +565,7 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
     \newcommand{\semesterplannerLua@event}[1][]{
         \pgfkeys{/semesterplanner-lua/timetable/event/.cd,content,time,day,tikz,scale
-		width,offset,textcolor,title,speaker,location,prio,formatter, ##1}
+        width,offset,textcolor,title,speaker,location,prio,formatter, ##1}
         \directlua{
             sp.addEvent{
                 time="\pgfkeysvalueof{/semesterplanner-lua/timetable/event/time}",
@@ -571,6 +591,7 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
     \newcommand{\lecture}[1][]{
         \semesterplannerLua@event[tikz={fill=lecture,}, textcolor=white, ##1]
+        \ignorespaces
     }
 %    \end{macrocode}
 %   \end{macro}
@@ -578,6 +599,7 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
     \newcommand{\seminar}[1][]{
         \semesterplannerLua@event[tikz={fill=seminar,}, textcolor=white, ##1]
+        \ignorespaces
     }
 %    \end{macrocode}
 %   \end{macro}
@@ -585,6 +607,7 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
     \newcommand{\tutorial}[1][]{
         \semesterplannerLua@event[tikz={fill=tutorial,}, textcolor=white, ##1]
+        \ignorespaces
     }
 %    \end{macrocode}
 %   \end{macro}
@@ -592,6 +615,7 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
     \newcommand{\meeting}[1][]{
         \semesterplannerLua@event[tikz={fill=meeting,}, textcolor=white, ##1]
+        \ignorespaces
     }
 %    \end{macrocode}
 %   \end{macro}
@@ -599,6 +623,7 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
     \newcommand{\officehour}[1][]{
         \semesterplannerLua@event[tikz={fill=officehour,}, textcolor=white, ##1]
+        \ignorespaces
     }
 %    \end{macrocode}
 %   \end{macro}
@@ -630,20 +655,22 @@ Running "make install" installs the files in the local TeX tree.
 \newenvironment{appointments}[2][Room]{
     \directlua{cal.init(#2)}
     \newcommand{\appointment}[1][]{%
-		\pgfkeys{/semesterplanner-lua/calendar/.cd,draw,room,time,prio,course,desc,date,end,tikz,period,type,shift,print, ##1}%
-		\directlua{
-			cal.addAppointment{draw=\pgfkeysvalueof{/semesterplanner-lua/calendar/draw},
-			room=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/room}]],
-			time=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/time}]],
-			prio=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/prio}]],
-			course=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/course}]],
-			desc=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/desc}]],
-			date=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/date}]],
-			endDate=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/end}]],
-			tikz=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/tikz}]],
-			period=\pgfkeysvalueof{/semesterplanner-lua/calendar/period},
-			shift=\pgfkeysvalueof{/semesterplanner-lua/calendar/shift},
-			print=\pgfkeysvalueof{/semesterplanner-lua/calendar/print}}}}
+        \pgfkeys{/semesterplanner-lua/calendar/.cd,draw,room,time,prio,course,desc,date,end,tikz,period,type,shift,print, ##1}%
+        \directlua{
+            cal.addAppointment{draw=\pgfkeysvalueof{/semesterplanner-lua/calendar/draw},
+            room=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/room}]],
+            time=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/time}]],
+            prio=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/prio}]],
+            course=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/course}]],
+            desc=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/desc}]],
+            date=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/date}]],
+            endDate=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/end}]],
+            tikz=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/tikz}]],
+            period=\pgfkeysvalueof{/semesterplanner-lua/calendar/period},
+            shift=\pgfkeysvalueof{/semesterplanner-lua/calendar/shift},
+            print=\pgfkeysvalueof{/semesterplanner-lua/calendar/print}}}%
+        \ignorespaces
+        }
     \section*{\faCalendar~Appointments}
     \begin{tabular}{rlllll}
         \textbf{Date}&\textbf{Time}&\textbf{Course}&\textbf{Description}&\textbf{#1}&\textbf{Prio.}\\
@@ -666,7 +693,9 @@ Running "make install" installs the files in the local TeX tree.
                 tikz=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/tikz}]],
                 type=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/type}]],
                 shift=\pgfkeysvalueof{/semesterplanner-lua/calendar/shift},
-                print=\pgfkeysvalueof{/semesterplanner-lua/calendar/print}}}}
+                print=\pgfkeysvalueof{/semesterplanner-lua/calendar/print}}}%
+        \ignorespaces
+        }
     \section*{\faStickyNoteO~Exams}
     \begin{tabular}{rllll}
         \textbf{Date}&\textbf{Time}&\textbf{Course}&\textbf{Type}&\textbf{Note}\\
@@ -687,7 +716,9 @@ Running "make install" installs the files in the local TeX tree.
                 tikz=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/tikz}]],
                 prio=[[\pgfkeysvalueof{/semesterplanner-lua/calendar/prio}]],
                 shift=\pgfkeysvalueof{/semesterplanner-lua/calendar/shift},
-                print=\pgfkeysvalueof{/semesterplanner-lua/calendar/print}}}}
+                print=\pgfkeysvalueof{/semesterplanner-lua/calendar/print}}}%
+        \ignorespaces
+        }
     \section*{\faStickyNoteO~Deadlines}
     \begin{tabular}{rlll}
         \textbf{Date}&\textbf{Course}&\textbf{Description}&\textbf{Prio}\\
@@ -1037,7 +1068,7 @@ end
 %    \begin{macrocode}
 function addEvent(opts)
     opts.inputlineno = tex.inputlineno
-	print(string.format("collecting from line %d", opts.inputlineno))
+    print(string.format("collecting from line %d", opts.inputlineno))
     if opts.draw then
         assert(opts.date ~= nil and opts.tikz ~= nil, "date and tikz has to be given")
         if opts.endDate == nil or opts.endDate == '' then
@@ -1088,7 +1119,7 @@ end
 function drawCalendar(minDate, maxDate, cols)
     minDate = dateLib(minDate)
     maxDate = dateLib(maxDate)
-    text.print([[\begin{tikzpicture}[every calendar/.style={inner sep=2pt, week list, month label above centered, month text={\textcolor{red}{\%mt} \%y-}}] ]])
+    text.print([[\begin{tikzpicture}[every calendar/.style={day headings=red!50,day letter headings,inner sep=2pt, week list, month label above centered, month text={\textcolor{red}{\%mt} \%y-}, every month/.style={yshift=3ex}}] ]])
     text.print([[\matrix[column sep=1em, row sep=1em]{]])
         local i = 1
         running = true
@@ -1100,7 +1131,9 @@ function drawCalendar(minDate, maxDate, cols)
                 running = false
             end
             text.print(string.format(
-            [[\calendar (%04d-%02d) [dates=%04d-%02d-%02d to %04d-%02d-%02d] if (Sunday) [red] if (Saturday) [red!50!white] if (equals=\year-\month-\day) [nodes={inner sep=.4em,rectangle,line width=1pt,draw}] if (at least=\year-\month-\day) {} else [nodes={strike out, draw}]; ]],
+            [[\calendar (%04d-%02d) [dates=%04d-%02d-%02d to %04d-%02d-%02d] if (Sunday) [red] if (Saturday) [red!50!white] if (equals=\year-\month-\day) [nodes={inner sep=.25em,rectangle,line width=1pt,draw}] if (at least=\year-\month-\day) {} else [nodes={strike out, draw}]; ]],
+			%04d-%02d-%02d] if (Sunday) [red] if (Saturday) [red!50!white]
+			if (equals=\year-\month-\day) [nodes={inner sep=.25em,rectangle,line width=1pt,draw}] if (at least=\year-\month-\day) {} else [nodes={strike out, draw}]; ]],
                     minDate:getyear(), minDate:getmonth(), minDate:getyear(), minDate:getmonth(), minDate:getday(), endDate:getyear(), endDate:getmonth(), endDate:getday()))
 
             minDate:addmonths(1)
