@@ -20,6 +20,7 @@ inst: all
 	mkdir -p $(UTREE)/{tex,source,doc}/latex/$(NAME)
 	cp $(NAME).dtx $(UTREE)/source/latex/$(NAME)
 	cp $(NAME).sty $(UTREE)/tex/latex/$(NAME)
+	cp $(NAME)*.lua $(UTREE)/tex/latex/$(NAME)
 	cp $(NAME).pdf $(UTREE)/doc/latex/$(NAME)
 install: all
 	sudo mkdir -p $(LOCAL)/{tex,source,doc}/latex/$(NAME)
