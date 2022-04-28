@@ -15,7 +15,7 @@ $(NAME).pdf: $(NAME).dtx
 clean:
 	rm -f $(NAME).{aux,fls,glo,gls,hd,idx,ilg,ind,ins,log,out,toc}
 distclean: clean
-	rm -f $(NAME).{pdf,sty,lua} README
+	rm -f $(NAME)-*.lua $(NAME).{pdf,sty,lua} README
 inst: all
 	mkdir -p $(UTREE)/{tex,source,doc}/latex/$(NAME)
 	cp $(NAME).dtx $(UTREE)/source/latex/$(NAME)

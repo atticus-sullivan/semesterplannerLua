@@ -425,6 +425,7 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
         /semesterplanner-lua/timetable/env/.cd,
         days/.initial={Mon,Thue,Wend,Thur,Fri}, days/.default={Mon,Thue,Wend,Thur,Fri},
+        dayse/.initial={M,T,W,Th,F}, days/.default={M,T,W,Th,F},
         %
         start time/.initial=, start time/.default=,
         end time/.initial=, end time/.default=,
@@ -550,10 +551,11 @@ Running "make install" installs the files in the local TeX tree.
 %   possible previous runs.
 %    \begin{macrocode}
     \pgfkeys{/semesterplanner-lua/timetable/env/.cd, days,start time,end time, width,length, #1}
-    \directlua{sp.init(
-        "\pgfkeysvalueof{/semesterplanner-lua/timetable/env/days}",
-        "\pgfkeysvalueof{/semesterplanner-lua/timetable/env/start time}",
-        "\pgfkeysvalueof{/semesterplanner-lua/timetable/env/end time}")}
+    \directlua{sp.init{
+        days=[[\pgfkeysvalueof{/semesterplanner-lua/timetable/env/days}]],
+        min=[[\pgfkeysvalueof{/semesterplanner-lua/timetable/env/start time}]],
+        max=[[\pgfkeysvalueof{/semesterplanner-lua/timetable/env/end time}]],
+        dayse=[[\pgfkeysvalueof{/semesterplanner-lua/timetable/env/dayse}]]}}
 %    \end{macrocode}
 %   \begin{macro}{\semesterplanner@event}
 % Is used to pass the event to the lua engine which in turn will collect
@@ -745,34 +747,37 @@ Running "make install" installs the files in the local TeX tree.
 %   calculated from the events.
 % \end{description}
 %    \begin{macrocode}
-function init(days, min, max)
+function init(opts)
+    if(not checkKeys(opts, {"days", "min", "max", "dayse"})) then
+        error("missing argument")
+    end
     -- clean up first
     -- global variables
     EVENTS={}
-    DAYS = days -- header with names of the days set from tex currently
-    DAYSE = {"M","T","W","Th","F"}
+    DAYS  = prepareDays(opts.days) -- header with names of the days set from tex currently
+    DAYSE = prepareDays(opts.dayse) -- day representation in source code
     MIN = 25*60 -- bigger than any allowed value could be
     MAX = 0
     MIN_BYPASS = false -- weather min is fixed by the user
     MAX_BYPASS = false -- weather max is fixed by the user
 
-    if(min == "") then
+    if(opts.min == "") then
     else
-        assert(min:match("^%d+"), "start time has to be an integer representing the HH*60+MM of the desired start time")
-        MIN = tonumber(min)
+        assert(opts.min:match("^%d+"), "start time has to be an integer representing the HH*60+MM of the desired start time")
+        MIN = tonumber(opts.min)
         MIN_BYPASS = true
     end
 
-    if(max == "") then
+    if(opts.max == "") then
     else
-        assert(max:match("^%d+"), "end time has to be an integer representing the HH*60+MM of the desired end time")
-        MAX = tonumber(max)
+        assert(opts.max:match("^%d+"), "end time has to be an integer representing the HH*60+MM of the desired end time")
+        MAX = tonumber(opts.max)
         MAX_BYPASS = true
     end
 end
 
 function defaultFormatter(opts)
-    ret = ""
+    local ret = ""
     for k,v in pairs(opts) do
         if type(k) == "string" then k = k:gsub("[_^]", "") end
         if type(v) == "string" then v = v:gsub("[_^]", "") end
@@ -827,7 +832,7 @@ end
 function draw(length, width)
     -- copy relevant variables for working on local copies
     local events = copy_array(EVENTS)
-    local days = prepareDays(DAYS)
+    local days = copy_array(DAYS)
     local daysE = copy_array(DAYSE)
     local min, minH, max, maxH = prepareMinMax(MIN, MAX)
 
