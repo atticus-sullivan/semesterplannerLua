@@ -426,7 +426,7 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
         /semesterplanner-lua/timetable/env/.cd,
         days/.initial={Mon,Thue,Wend,Thur,Fri}, days/.default={Mon,Thue,Wend,Thur,Fri},
-        dayse/.initial={M,T,W,Th,F}, days/.default={M,T,W,Th,F},
+        dayse/.initial={M,T,W,Th,F}, dayse/.default={M,T,W,Th,F},
         %
         start time/.initial=, start time/.default=,
         end time/.initial=, end time/.default=,
@@ -476,7 +476,9 @@ Running "make install" installs the files in the local TeX tree.
         title/.initial=, title/.default=,
         speaker/.initial=, speaker/.default=,
         location/.initial=, location/.default=,
+        password/.initial=, password/.default=,
         prio/.initial=, prio/.default=,
+        type/.initial=, type/.default=,
         formatter/.initial=timetableformatter, formatter/.default=timetableformatter,
         %
 %    \end{macrocode}
@@ -551,7 +553,7 @@ Running "make install" installs the files in the local TeX tree.
 %   Afterwards the lua module is beeing initialized (erase data from
 %   possible previous runs.
 %    \begin{macrocode}
-    \pgfkeys{/semesterplanner-lua/timetable/env/.cd, days,start time,end time, width,length, #1}
+    \pgfkeys{/semesterplanner-lua/timetable/env/.cd, days,dayse, start time,end time, width,length, #1}
     \directlua{sp.init{
         days=[[\pgfkeysvalueof{/semesterplanner-lua/timetable/env/days}]],
         min=[[\pgfkeysvalueof{/semesterplanner-lua/timetable/env/start time}]],
@@ -568,7 +570,7 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
     \newcommand{\semesterplannerLua@event}[1][]{
         \pgfkeys{/semesterplanner-lua/timetable/event/.cd,content,time,day,tikz,scale
-        width,offset,textcolor,title,speaker,location,prio,formatter, ##1}
+        width,offset,textcolor,title,speaker,type,location,password,prio,formatter, ##1}
         \directlua{
             sp.addEvent{
                 time="\pgfkeysvalueof{/semesterplanner-lua/timetable/event/time}",
@@ -581,7 +583,9 @@ Running "make install" installs the files in the local TeX tree.
                 title=[[\pgfkeysvalueof{/semesterplanner-lua/timetable/event/title}]],
                 speaker=[[\pgfkeysvalueof{/semesterplanner-lua/timetable/event/speaker}]],
                 location=[[\pgfkeysvalueof{/semesterplanner-lua/timetable/event/location}]],
+                password=[[\pgfkeysvalueof{/semesterplanner-lua/timetable/event/password}]],
                 prio=[[\pgfkeysvalueof{/semesterplanner-lua/timetable/event/prio}]],
+                type=[[\pgfkeysvalueof{/semesterplanner-lua/timetable/event/type}]],
             }
         }
     }
@@ -593,7 +597,7 @@ Running "make install" installs the files in the local TeX tree.
 %   \begin{macro}{\lecture}
 %    \begin{macrocode}
     \newcommand{\lecture}[1][]{
-        \semesterplannerLua@event[tikz={fill=lecture,}, textcolor=white, ##1]
+        \semesterplannerLua@event[tikz={fill=lecture,}, textcolor=white, type=lect, ##1]
         \ignorespaces
     }
 %    \end{macrocode}
@@ -601,7 +605,7 @@ Running "make install" installs the files in the local TeX tree.
 %   \begin{macro}{\seminar}
 %    \begin{macrocode}
     \newcommand{\seminar}[1][]{
-        \semesterplannerLua@event[tikz={fill=seminar,}, textcolor=white, ##1]
+        \semesterplannerLua@event[tikz={fill=seminar,}, textcolor=white, type=sem, ##1]
         \ignorespaces
     }
 %    \end{macrocode}
@@ -609,7 +613,7 @@ Running "make install" installs the files in the local TeX tree.
 %   \begin{macro}{\tutorial}
 %    \begin{macrocode}
     \newcommand{\tutorial}[1][]{
-        \semesterplannerLua@event[tikz={fill=tutorial,}, textcolor=white, ##1]
+        \semesterplannerLua@event[tikz={fill=tutorial,}, textcolor=white, type=tut, ##1]
         \ignorespaces
     }
 %    \end{macrocode}
@@ -617,7 +621,7 @@ Running "make install" installs the files in the local TeX tree.
 %   \begin{macro}{\meeting}
 %    \begin{macrocode}
     \newcommand{\meeting}[1][]{
-        \semesterplannerLua@event[tikz={fill=meeting,}, textcolor=white, ##1]
+        \semesterplannerLua@event[tikz={fill=meeting,}, textcolor=white, type=meet, ##1]
         \ignorespaces
     }
 %    \end{macrocode}
@@ -625,7 +629,7 @@ Running "make install" installs the files in the local TeX tree.
 %   \begin{macro}{\officehour}
 %    \begin{macrocode}
     \newcommand{\officehour}[1][]{
-        \semesterplannerLua@event[tikz={fill=officehour,}, textcolor=white, ##1]
+        \semesterplannerLua@event[tikz={fill=officehour,}, textcolor=white, type=office, ##1]
         \ignorespaces
     }
 %    \end{macrocode}
@@ -749,6 +753,7 @@ Running "make install" installs the files in the local TeX tree.
 % \end{description}
 %    \begin{macrocode}
 function init(opts)
+    tex.print([[\newwrite\timetableATdataOutput \immediate\openout\timetableATdataOutput=\jobname-data.dat]])
     if(not checkKeys(opts, {"days", "min", "max", "dayse"})) then
         error("missing argument")
     end
@@ -790,7 +795,7 @@ end
 
 function timetableformatter(opts)
     return string.format(
-        [[\textcolor{%s}{\textbf{%s}\\[.2em]\raggedright{%s}\\[0.5em]\raggedright{%s}\raggedright{%s}\\[0.5em]\raggedright{%s}}]],
+        [[\textcolor{%s}{\textbf{%s}\\[.2em]\raggedright{%s}\\[0.5em]\raggedright{%s}\hfil\raggedright{%s}\\[0.5em]\raggedright{%s}}]],
             opts.textcolor, opts.title, opts.speaker, opts.prio, opts.location, opts.time)
 end
 %    \end{macrocode}
@@ -816,6 +821,8 @@ function addEvent(opts)
 
     opts.from,opts.to = dur2Int(opts.time)
 
+    tex.print(string.format([[\immediate\write\timetableATdataOutput{\unexpanded{%s;%s;%s;%s;%s;%s}}]], opts.from + 24*60*day2Int(opts.day), opts.to + 24*60*day2Int(opts.day), opts.title, opts.location:match([[\href{(.*)}{.*}]]) or opts.location, opts.password, opts.type))
+
     if(not MIN_BYPASS and opts.from < MIN) then MIN = opts.from end
     if(not MAX_BYPASS and opts.to   > MAX) then MAX = opts.to   end
     assert(opts.from < opts.to, "From has to be before to")
@@ -834,7 +841,6 @@ function draw(length, width)
     -- copy relevant variables for working on local copies
     local events = copy_array(EVENTS)
     local days = copy_array(DAYS)
-    local daysE = copy_array(DAYSE)
     local min, minH, max, maxH = prepareMinMax(MIN, MAX)
 
     assert(length:match("%d*%.?%d*"), "Length must be a valid length measured in cm")
@@ -898,7 +904,7 @@ function draw(length, width)
             if e.to   > max then e.to   = max end
             if e.from < min then e.from = min end
             print("Drawing event on line ", e.inputlineno)
-            d = search_array(daysE, e.day) - 1
+            d = day2Int(e.day)
             tex.print(string.format(
                 [[\node[defStyle,text width=-%fem+%f%s/%d, text depth=%fcm-%fem, text height=%fem, %s] at (%f*%s,%fcm) {%s};]],
                 2*red, -- text width
@@ -1001,6 +1007,13 @@ function prepareDays(days)
 end
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{day2Int}
+% converts the day-string to an integer (Monday is 0)
+%    \begin{macrocode}
+function day2Int(day)
+    return search_array(DAYSE, day) - 1
+end
+% \end{macro}
 % \begin{macro}{copyArray}
 % Returns a copy of the table |obj|
 %    \begin{macrocode}
@@ -1023,7 +1036,8 @@ end
 semesterplannerLua = {
     init = init,
     addEvent = addEvent,
-    draw = draw
+    draw = draw,
+    day2Int = day2Int,
 }
 return semesterplannerLua
 %</luaTimetable>
