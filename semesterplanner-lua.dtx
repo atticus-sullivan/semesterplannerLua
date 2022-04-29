@@ -72,6 +72,11 @@ Running "make install" installs the files in the local TeX tree.
   \nopreamble\nopostamble
   \file{\jobname-calendar.lua}{\from{\jobname.dtx}{luaApp}}
 }
+\usedir{tex/latex/semesterplanner-lua}
+\generate{
+  \nopreamble\nopostamble
+  \file{\jobname-dmenu.lua}{\from{\jobname.dtx}{luaDmenu}}
+}
 %</install>
 %<install>\endbatchfile
 %<*internal>
@@ -112,7 +117,7 @@ Running "make install" installs the files in the local TeX tree.
 %<package>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
 %<package>\ProvidesPackage{semesterplanner-lua}
 %<*package>
-    [2021/10/07 v0.2 Semesterplanner package in lua with tikz only]
+    [2021/10/07 v0.3 Semesterplanner package in lua with tikz only]
 
 \RequirePackage{tikz}
 \usetikzlibrary{calendar, positioning, shapes.misc, backgrounds}
@@ -137,8 +142,9 @@ Running "make install" installs the files in the local TeX tree.
 %
 %\maketitle
 %
-%\changes{v1.00}{2021/10/07}{First public release}
-%\changes{v1.10}{2022/04/28}{Added new options (providing day representation in sourc code)} % TODO documentation
+%\changes{v1.0}{2021/10/07}{First public release}
+%\changes{v1.1}{2022/04/28}{Added new options (providing day representation in source code)} % TODO documentation
+%\changes{v1.2}{2022/04/30}{Write out timetable data to be able to build e.g. something with dmenu over it} % TODO documentation
 %
 % \begin{abstract}
 % This package provides a mean to easily print a timetable e.g. for a
@@ -1210,5 +1216,109 @@ semesterplannerLuaCal = {
 }
 return semesterplannerLuaCal
 %</luaApp>
+%    \end{macrocode}
+
+% \subsection{semesterplanner-lua-calendar.lua}
+% TODO how to set the paths right in this case
+% Include the date module for time date calculations
+%    \begin{macrocode}
+%<*luaDmenu>
+-- TODO install to e.g. `/usr/share/texmf-dist/scripts/`
+
+local function dur2str(dur)
+    return string.format("%02d:%02d", dur//60, dur%60)
+end
+
+local maxes = {title=0, location=0, type=0}
+
+local before = {diff=25*60*7}
+local after  = {diff=25*60*7}
+
+local c = {}
+
+local current   = os.date("*t")
+local today     = tonumber(os.date("%u")) - 1
+current.minutes = current.min + (today*24 + current.hour)*60
+
+
+local fields = {"start", "end", "title", "location", "password", "type"}
+for line in  io.lines(arg[1]) do
+    local ele,i = {},1
+    for e in line:gmatch("[^;]*") do
+        ele[fields[i]] = e
+        i = i+1
+    end
+    ele.start, ele["end"] = tonumber(ele.start), tonumber(ele["end"])
+    ele.url      = ele.location:match([[\href ?{(.*)}{.*}]])
+    ele.location = ele.location:match([[\href ?{.*}{(.*)}]]) or ele.location
+
+    if maxes.title    < #ele.title    then maxes.title    = #ele.title    end
+    if maxes.location < #ele.location then maxes.location = #ele.location end
+    if maxes.type     < #ele.type     then maxes.type     = #ele.type     end
+
+    if current.minutes > ele.start and current.minutes < ele["end"] then
+        ele.diff = current.minutes-ele["start"]
+        table.insert(c, ele)
+    elseif current.minutes < ele.start then
+        if ele.start - current.minutes < before.diff then
+            before = {diff=ele.start-current.minutes}
+        end
+        if ele.start - current.minutes <= before.diff then
+            ele.diff = before.diff
+            table.insert(before, ele)
+        end
+    elseif current.minutes > ele["end"] then
+        if current.minutes - ele["end"] < after.diff then
+            after = {diff=current.minutes-ele["end"]}
+        end
+        if current.minutes - ele["end"] <= after.diff then
+            ele.diff = after.diff
+            table.insert(after, ele)
+        end
+    end
+end
+
+local dmenu_in,map = {},{}
+for _,x in ipairs(after) do
+    local s = string.format("%-".. maxes.title+1+maxes.type .."s %-".. maxes.location+2 .."s # ended %s ago", x.title.."-"..x.type, "("..x.location..")", dur2str(x.diff))
+    table.insert(dmenu_in, s)
+    map[s] = x
+end
+
+for _,x in ipairs(c) do
+    local s = string.format("%-".. maxes.title+1+maxes.type .."s %-".. maxes.location+2 .."s # began %s ago", x.title.."-"..x.type, "("..x.location..")", dur2str(x.diff))
+    table.insert(dmenu_in, s)
+    map[s] = x
+end
+
+for _,x in ipairs(before) do
+    local s = string.format("%-".. maxes.title+1+maxes.type .."s %-".. maxes.location+2 .."s # begins in %s", x.title.."-"..x.type, "("..x.location..")", dur2str(x.diff))
+    table.insert(dmenu_in, s)
+    map[s] = x
+end
+
+local dmenu_ins = table.concat(dmenu_in, "\n")
+
+print(dmenu_ins)
+-- TODO check for forbidden strings in dmenu_in
+local proc = io.popen(string.format("echo '%s' | dmenu -i -l %d -p 'Select entry'", dmenu_ins, #dmenu_in), "r")
+local dmenu_out = proc:read("l")
+if not dmenu_out then
+    os.execute("notify-send 'Uni' 'Nothing selected'")
+    os.exit()
+end
+
+local sel = map[dmenu_out]
+assert(sel, "Error building/reading the lookup table")
+if sel.url and sel.url ~= "" then
+    os.execute(string.format("echo -n '%s' | xsel -b && notify-send -h string:x-canonical-private-synchronous:uni 'Uni' 'Copied URL to clipboard'", sel.url))
+elseif sel.location and sel.location ~= "" then
+    os.execute(string.format("echo -n 'https://portal.mytum.de/campus/roomfinder/search_room_results?searchstring=%s&building=Alle&search=Suche+starten' | xsel -b && notify-send -h string:x-canonical-private-synchronous:uni 'Uni' 'Copied Roomfinder-url to clipboard'", sel.location))
+end
+
+if sel.password and sel.password ~= "" then
+    os.execute(string.format("sleep 3 && echo -n '%s' | xsel -b && notify-send -h string:x-canonical-private-synchronous:uni 'Uni' 'Copied password to clipboard'", sel.password))
+end
+%</luaDmenu>
 %    \end{macrocode}
 %\Finale
