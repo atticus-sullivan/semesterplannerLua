@@ -1,12 +1,3 @@
-*fls
-*glo
-*gls
-*hd
-*idx
-*ilg
-*ind
-*ins
-*lua
-*out
-*sty
-*toc
+Makefile
+build/
+.*

@@ -1,0 +1,886 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2024 by Lukas Heindl <<+email+>>
+% ---------------------------------------------------------------------------
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+%
+% The Current Maintainer of this work is Lukas Heindl.
+%
+% This work consists of the files beamercolorthemeCatppuccin.dtx and beamercolorthemeCatppuccin.ins
+% and the derived filebase beamercolorthemeCatppuccin.sty.
+%
+% \fi
+%
+% \iffalse
+%<*driver>
+\ProvidesFile{semesterplannerLua.dtx}
+%</driver>
+%<package>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+%<package>\ProvidesPackage{semesterplannerLua}
+%<*package>
+%  [2024/02/25 v0.0.1 Semesterplanner package in lua with tikz only]
+%</package>
+%
+%<*driver>
+\documentclass{ltxdoc}
+\usepackage[a4paper,margin=25mm,left=50mm,nohead]{geometry}
+\usepackage[numbered]{hypdoc}
+\usepackage{array}
+\usepackage{semesterplannerLua}[2024/02/25]
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+\begin{document}
+  \DocInput{\jobname.dtx}
+  \PrintChanges
+  \PrintIndex
+\end{document}
+%</driver>
+% \fi
+%
+% \CheckSum{362}
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+%
+% \changes{v0.0.0}{2021/10/07}{First draft}
+% \changes{v0.0.1}{2022/04/28}{Added new options (providing day
+% representation in source code)}
+% \changes{v0.0.2}{2022/04/30}{Write out timetable data to be able to build
+% e.g. something with dmenu over it and provide an example dmenu lua
+% script}
+% \changes{v0.0.3}{2024/02/25}{Rename to semesterplannerLua and rewrite for
+% l3build}
+%
+%
+% \DoNotIndex{\newcommand,\newenvironment,\\,\begin,\end,\def,\definecolor,\directlua,\endinput,\faBullhorn,\faCamera,\faFlag,\faQuestion,\faTimesCircle,\faWarning,\faWindows,\faYoutubePlay,\node,\pgfkeys,\pgfkeysvalueof,\protected,\raggedright,\textbf,\textcolor,\textwidth,\unexpanded,\",\x,\y,\year,\week,\tiny,\tikz@lib@cal@xshift,\tikz@lib@cal@yshift,\tikz,\textit,\t,\section,\phantom,\pgftransformyshift,\pgftransformxshif,\pgfmathsetlength,\pgf@ya,\pgf@xa,\openout,\n,\newwrite,\month,\minuteToFrac,\matrix,\l,\jobname,\init,\immediate,\ignorespaces,\ifdate,\hfil,\href,\foreach,\faStickyNoteO,\faPencil,\faComment,\faClockO,\faCalendar,\faBold,\draw,\d,\day,\checkKeys,\%}
+%
+% \providecommand*{\url}{\texttt}
+% \GetFileInfo{semesterplannerLua.dtx}
+% \title{\textsf{semesterplannerLua} --- Semesterplanner package in lua
+%   with tikz only
+% }
+% \author{Lukas Heindl \\ \url{<+email+>} \\ \faGithub:
+% \url{https://github.com/atticus-sullivan/semesterplannerLua}}
+% \date{\fileversion~from \filedate}
+%
+% \maketitle
+%
+% \begin{abstract}
+% This package provides a mean to easily print a timetable e.g. for a
+% semesterplan. The reason for this package to exist is that I wanted to
+% reimplement \url{https://github.com/nlschn/semesterplanner/} with
+% printing the timetable with |tikz| only (which is more easily to be
+% modified) and with the ability of making entries spanning only a fraction
+% of the column (for showing simultanious events).
+% 
+% Documents using this package need to be compiled with
+% LuaLaTeX. The package requires |xcolor|, |fontawesome|, |tikz| (and |pgfkeys|).
+% \end{abstract}
+%
+% \tableofcontents
+%
+% \section{Usage}
+% \subsection{timetable}
+%
+% \DescribeEnv{timetable} |\begin{timetable}[opts]...\end{timetable}|\\
+% This is the core environment of this package. Within it you can use
+% |\lecture|, |\seminar|, |\tutorial|, |\officehour| and |\meeting|. All
+% these commands are only defined inside the |timetable| environment, and
+% have the same structure. It typesets a timetable with the specified
+% entries. If you have a look at the |.sty| file you'll see that these
+% macros just take a general macro and set some default values before. Thus
+% it is easy to define new ones (keep in mind that you'll need
+% |\makeatletter|) to access the general macro.
+%
+% Writes out a file containing the data from the timetable (your events) to
+% be able to have just the |.tex| file containing the timetable, but do
+% some scriping on the data (e.g. show the last, current and next events).
+% For simplicity the data is stored in lua-syntax (|return|s a table of the
+% events). This way we don't need to worry about any string escaping (like
+% with csv) and no complicated parsers are needed. Be aware though that a
+% simple |events = dofile"path"| has risks since |"path"| might contain lua
+% code which is simply executed that way.
+%
+% |opts| are optional arguments (enclosed with |{}|) separated with |,|:
+% \begin{description}
+%     \item[|days|] List of the names of the days that should be set as
+%     column names. Note that if you specify only 4 names only these 4
+%     columns will be printed (with the first day being identified as
+%     Monday)
+%     \textit{Default: |Mon,Thue,Wend,Thur,Fri|}
+%     \item[|dayse|] List of strings used in the code to idenfity the day.
+%     This list is kind of a mapping string $\to$ integer.
+%     \item[|start time|] Explicit start-time of the timetable given in minutes
+%     (|HH*60 + MM|). Can be set as |start time/.evaluated={HH*60 + MM}|.
+%     If this is empty, the start time is derived from the given events.
+%     \textit{Default: |""|}
+%     \item[|end time|] Equivalent to |start-time|
+%     \textit{Default: |""|}
+%     \item[|width|] Give the width of the timetable. (can be given e.g. as
+%     |\textwidth| as this is directly given to tikz).
+%     \textit{Default:} |\textwidth|
+%     \item[|length|] Give the length of the timetable (measured in |cm|)
+%     (has to be a straight number since this is needed in calculation)
+%     \textit{Default: 10}
+% \end{description}
+% 
+% \DescribeMacro{\lecture}    |\lecture   [opts]|
+%
+% \DescribeMacro{\tutorial}   |\tutorial  [opts]|
+%
+% \DescribeMacro{\seminar}    |\seminar   [opts]|
+%
+% \DescribeMacro{\officehour} |\officehour[opts]|
+%
+% \DescribeMacro{\meeting}    |\meeting   [opts]|
+%
+% |opts| are optional arguments (enclosed with |{}|) separated with |,|:
+% \begin{description}
+%     \item[|title|] Give the name of the lecture
+%     \item[|speaker|] Give the name of the lecturer
+%     \item[|location|] Give the place of the event (most probably the room or
+%     an online plattform, see \ref{icons}). If you want to use
+%     |\href{url}{string repr}|, keep in mind that you need to
+%     |\unescaped{}| it, since all input to lua has to be text
+%     \item[|day|] The weekday on which the event takes place. Has to be
+%     one of those you specified in |dayse| (or by default: |M|,|T|,|W|,|Th|,|F|)
+%     \item[|time|] The timespan of the event formatted as |HH:MM-HH:MM|
+%     (24H clock)
+%     \item[|prio|] The priority of the event (see \ref{icons})
+%     \item[|scale width|] Specify the width of the entry in fractions
+%     of column (use |0.5| to span half the column).
+%     \item[|offset|] Shift the entry to the right. Specified in fractions
+%     of column.
+%     \item[|password|] Original purpose: Only included in the file written
+%     out with the timetable data, to be able to make a script which
+%     quickly copies url (from |location|) and |password| to the clipboard.
+%     \item[|type|] Only included in the file written out with the
+%     timetable data as well (Original purpose: To be able to exclude some
+%     types)
+%     \item[|tikz|] Free customizable event code. See the documentation
+%     at the end for keys that can be used here (all keys in |/event|). To
+%     simply pass arguments to the tikz-node that is being created for the
+%     event use |tikz/.append={your arguments}| (be careful with |text width|,
+%     |text height|, |text depth| as these keys are being used for
+%     the dimensions of the node as well as with |anchor|)
+%     \item[|content|] Is usually set automatically based on the other keys
+%     (|title|for instance). This key can override this.
+%     \item[|textcolor|] Usually set by the type of macro used
+%     \item[|formatter|] internal stub for providing different formatting
+%     options. Formatting functions need to be specified in the
+%     |-timetable.lua| file
+% \end{description}
+% The entries |Day| and |Time| are mandatory since they are needed for the
+% positioning of the node. All others are merely necessary for the content
+% of the node and are therefore nor mandatory.
+%
+% \subsubsection{Special Notes}
+% Note that the |length| argument does specify the length of the timetable
+% without taking account of the column headers.
+%
+% Same goes for the |width| parameter regarding the labels containing the
+% time on the right. Since in this case any tex-lenght is allowed, you can
+% simply try to subtract the length of the clock label using something like
+% |\settowidth{\length}{12:30}| to set a length to the length of a clock
+% label and then subtract this from the length you want to specify.
+%
+% \hangindent=4.5em \hangafter=1 \textbf{Hint:} The content of the
+% environment isn't processed by this package. Only the event commands (so
+% to speak |\lecture|,|\tutorial|,|\seminar|,|\officehour|,|\meeting| are
+% relevant.  All other contents are set immediately before the timetable.
+% Therefore, if you wan to add e.g. a |\hspace*{10cm}| to shift the
+% timetable to the left, the last line of the env would be the place to do
+% so (there musn't be an empty line below since otherwise a new paragraph
+% is started).
+%
+% \newpage
+% \subsubsection{Example}
+% |\begin{timetable}[|\\
+% |        days={Mon,Thue,Wend,Thur,Fri},|\\
+% |        start time/.evaluated={11*60}, end time/.evaluated={15*60}|\\
+% |    ]|\\
+% |    \lecture[title={TestingLectureLongOne},speaker={Doe},|\\
+% |        location={RN1},day={W},time={12:30-13:30}]|\\
+% |    \lecture[title={TestingLectureLongOne},speaker={John},|\\
+% |        location={RN1},day={Th},time={12:30-13:30},offset=0.5,scale width=0.5]|\\
+% |    \lecture[title={TestingLectureLongOne},speaker={Dr. Doe},|\\
+% |        location={\zoom},day={T},time={12:30-13:30},prio={\phigh}]|\\
+% |\end{timetable}|\\
+%
+% \begin{timetable}[days={Mon,Thue,Wend,Thur,Fri}, start
+% time/.evaluated={11*60}, end time/.evaluated={15*60}]
+%   \lecture[title={TestingLectureLongOne}, speaker={Heindl}, location={RN1},   day={W},  time={12:30-13:30}]
+%   \lecture[title={TestingLectureLongOne}, speaker={Heindl}, location={RN1},   day={Th}, time={12:30-13:30}, offset=0.5, scale width=0.5]
+%   \lecture[title={TestingLectureLongOne}, speaker={Heindl}, location={\zoom}, day={T},  time={12:30-13:30}, prio={\phigh}]
+%   \hspace*{-.2\textwidth}
+% \end{timetable}
+%
+% \subsection{Calendar related things}
+% Now some environments and commands come which in generally are being used
+% to typeset a table with the detailed information, but which also store
+% the gathered data internally.\\
+% This saved data can be used to output a calendar where the events (from
+% the saved data) are highlighted with a mark (already passed days are
+% crossed and the current day is highlighted as well).
+%
+% The different environments described below are similar in general, but
+% differ in detail (mostly the list of argument that are passed and printed
+% in the table).
+%
+% \newpage
+% \paragraph{Example}\mbox{}\\
+% |\begin{appointments}{true}|\\
+% |    \appointment[print=true,shift=false,tikz={fill=black,rectangle},|\\
+% |        date={2022-04-15}, course={Appointment with my dog},|\\
+% |        end={2022-04-18}, period={1}]|\\
+% |    \appointment[date={2022-04-14}, course={Appointment with my dog},|\\
+% |        room={at home}, time={12:00}, prio={\pmandatory}]|\\
+% |\end{appointments}|\\
+% |\begin{exams}{false}|\\
+% |    \exam[tikz={fill=yellow}, date={2022-06-20}, time={arround midday},|\\
+% |        course={Driving}, desc={Mid-Term}, prio={\phigh},|\\
+% |        room={University}, type={\oral}]|\\
+% |\end{exams}|\\
+% |\begin{deadlines}{false}|\\
+% |    \deadline[tikz={fill=blue}, date={2022-06-22},|\\
+% |        course={Submitting Driver-license form}, prio={\phigh}]|\\
+% |\end{deadlines}|\\
+% ||\\
+% |\printSpCalendar[2]{2022-04-01}{2022-07-31}|
+
+% \begin{appointments}{true}
+%     \appointment[print=true,shift=false,tikz={fill=black,rectangle}, date={2022-04-15}, course={Appointment with my dog}, end={2022-04-18}, period={1}]
+%     \appointment[date={2022-04-14}, course={Appointment with my dog}, room={at home}, time={12:00}, prio={\pmandatory}]
+% \end{appointments}
+% \begin{exams}{false} 
+%     \exam[tikz={fill=yellow}, date={2022-06-20}, time={arround midday}, course={Driving}, desc={Mid-Term}, prio={\phigh}, room={University}, type={\oral}]
+% \end{exams}
+% \begin{deadlines}{false}
+%     \deadline[tikz={fill=blue}, date={2022-06-22}, course={Submitting Driver-license form}, prio={\phigh}]
+% \end{deadlines}
+%
+% \printSpCalendar[2]{2022-04-01}{2022-07-31}
+%
+% \DescribeMacro{\printSpCalendar} |\printSpCalendar[cols]{start_date}{end_date}|\\
+% This is the macro to output such a calendar populated with the gathered
+% events.\\
+% Use the |cols| argument to specify the amount of columns being used
+% (months set side by side).\\
+% |start_date| and |end_date| both have to be specified in the |YYYY-MM-DD|
+% format.
+% 
+% \subsubsection{Appointments}
+% \DescribeEnv{appointments} |\begin{appointments}[Room]{true/false}...\end{appointments}|\\
+% Environment to typeset a table of appointments. Stores the data
+% internally to be able to typeset a calendar (with |\printSpCalendar|)
+% with a mark for each event.\\
+% The optional argument is used as header for the |Room| column (maybe for
+% some appointments another title is more suitable).\\
+% The mandatory argument which is |true/false| decides if the internally
+% stored data used to typeset the calendar is being erased before this
+% environment.
+%
+% \DescribeMacro{\appointment} |\appointment[opts]|\\
+% |opts| are optional arguments (enclosed with |{}|) separated with |,|:
+% \begin{description}
+%     \item[|date|] Date of the appointment formatted as |YYYY-MM-DD|
+%     \item[|course|] Name of the course
+%     \item[|room|] Room (only shown in the table)
+%     \item[|time|] Time of the event (free text independant of any
+%     formatting, only shown in the table)
+%     \item[|prio|] priority of the event (shown in the table) (see
+%     \ref{icons})
+%     \item[|desc|] Description of the event (shown in the table)
+%     \item[|end|] upper boundary when the event should stop to repeat (with
+%     |period|). Has to be set to make event periodic/repeating.
+%     \item[|period|] Set the period of the repeating event.
+%     \item[|draw|] |true/false| wether to draw a mark in the calendar
+%     \item[|print|] |true/false| wether to display te entry in the
+%     appointments table.
+%     \item[|shift|] |true/false| wether to shift the mark in the calendar if
+%     there is already another event on that date (to be able to see both
+%     marks)
+%     \item[|tikz|] Free customizable tikz code used for drawing the mark
+%     in the calendar. See the documentation at the end for keys that can
+%     be used here (all keys in |/cal|). To simply pass arguments to the
+%     tikz-node that is being created for the event use |tikz/.append={your arguments}|\\
+%     Use e.g. to set the color of the mark via |tikz/.append={green}|
+% \end{description}
+% \subsubsection{Exams}
+% \DescribeEnv{exams} |\begin{exams}{true/false}...\end{exams}|\\
+% Environment to typeset a table of exams. Stores the data
+% internally to be able to typeset a calendar (with |\printSpCalendar|)
+% with a mark for each event.\\
+% The mandatory argument which is |true/false| decides if the internally
+% stored data used to typeset the calendar is being erased before this
+% environment.
+%
+% \DescribeMacro{\exam} |\exam[opts]|\\
+% |opts| are optional arguments (enclosed with |{}|) separated with |,|:
+% \begin{description}
+%     \item[|date|] Date of the exam formatted as |YYYY-MM-DD|
+%     \item[|course|] Name of the course
+%     \item[|room|] Room (only shown in the table)
+%     \item[|type|] Type of the exam (see \ref{icons}) (intended:
+%     written/oral)
+%     \item[|time|] Time of the event (free text independant of any
+%     formatting, only shown in the table)
+%     \item[|desc|] Description of the event (shown in the table)
+%     \item[|draw|] |true/false| wether to draw a mark in the calendar
+%     \item[|print|] |true/false| wether to display te entry in the
+%     exams table.
+%     \item[|shift|] |true/false| wether to shift the mark in the calendar if
+%     there is already another event on that date (to be able to see both
+%     marks)
+%     \item[|tikz|] Free customizable tikz code used for drawing the mark
+%     in the calendar. See the documentation at the end for keys that can
+%     be used here (all keys in |/cal|). To simply pass arguments to the
+%     tikz-node that is being created for the event use |tikz/.append={your arguments}|\\
+%     Use e.g. to set the color of the mark via |tikz/.append={green}|
+% \end{description}
+%
+% \subsubsection{Deadlines}
+% \DescribeEnv{deadlines} |\begin{deadlines}{true/false}...\end{deadlines}|\\
+% Environment to typeset a table of deadlines. Stores the data
+% internally to be able to typeset a calendar (with |\printSpCalendar|)
+% with a mark for each event.\\
+% The mandatory argument which is |true/false| decides if the internally
+% stored data used to typeset the calendar is being erased before this
+% environment.
+%
+% \DescribeMacro{\deadline} |\deadline[opts]|\\
+% |opts| are optional arguments (enclosed with |{}|) separated with |,|:
+% \begin{description}
+%     \item[|date|] Date of the deadline formatted as |YYYY-MM-DD|
+%     \item[|course|] Name of the course
+%     \item[|prio|] priority of the event (shown in the table) (see
+%     \ref{icons})
+%     \item[|desc|] Description of the event (shown in the table)
+%     \item[|draw|] |true/false| wether to draw a mark in the calendar
+%     \item[|print|] |true/false| wether to display te entry in the
+%     deadlines table.
+%     \item[|shift|] |true/false| wether to shift the mark in the calendar if
+%     there is already another event on that date (to be able to see both
+%     marks)
+%     \item[|tikz|] Free customizable tikz code used for drawing the mark
+%     in the calendar. See the documentation at the end for keys that can
+%     be used here (all keys in |/cal|). To simply pass arguments to the
+%     tikz-node that is being created for the event use |tikz/.append={your arguments}|\\
+%     Use e.g. to set the color of the mark via |tikz/.append={green}|
+% \end{description}
+%
+% \subsection{Icons}\label{icons}
+% This package defines some modified fontawesome icons (they are being
+% encircled with a white circle for better readability).\\
+% \begin{tabular}{rl|rl}
+%     |\zoom| & \textcolor{DodgerBlue}{\faCamera} &
+%     |\teams| & \textcolor{DodgerBlue}{\faWindows}
+%     \\
+%     |\BBB| & \textcolor{DodgerBlue}{\faBold} &
+%     |\youtube| & \textcolor{DodgerBlue}{\faYoutubePlay}
+%     \\\hline
+%     |\pmandatory| & \textcolor{red}{\faWarning} &
+%     |\phigh| & \textcolor{red}{\faFlag}
+%     \\
+%     |\pmid| & \textcolor{yellow}{\faFlag} &
+%     |\plow| & \textcolor{green}{\faFlag}
+%     \\
+%     |\pnone| & \textcolor{gray}{\faTimesCircle}
+%     \\ \hline
+%     |\tbd| & \faQuestion &
+%     |\tba| & \faBullhorn
+% \end{tabular}
+%
+%
+%
+% \StopEventually{
+%   \PrintChanges
+%   \PrintIndex
+% }
+%
+% \newpage
+% \section{Implementation}
+% This package uses |semesterplannerLua| as prefix/directory where
+% possible. Since this is not possible for latex macro names, in this
+% occasions |semesterplannerLua@| is used as prefix.
+% \subsection{semesterplannerLua.sty}
+% \subsubsection{Global Stuff}
+%    \begin{macrocode}
+%<*package>
+\RequirePackage{tikz}
+\usetikzlibrary{calendar, positioning, shapes.misc, backgrounds}
+\RequirePackage{pgfkeys}
+\RequirePackage{xcolor}
+\RequirePackage{fontawesome}
+\usepackage{luapackageloader} % use the default lua path as well
+%    \end{macrocode}
+% Define some colors for the course types (can be globally overwritten)
+%    \begin{macrocode}
+\definecolor{seminar}{rgb}{1.0, 0.8, 0.0}
+\definecolor{lecture}{rgb}{0.2, 0.7, 1.0}
+\definecolor{tutorial}{rgb}{0.0, 0.8, 0.0}
+\definecolor{meeting}{rgb}{0.8, 0.0, 0.0}
+\definecolor{officehour}{rgb}{0.0, 0.4, 0.6}
+\definecolor{DodgerBlue}{HTML}{1E90FF}
+%    \end{macrocode}
+% \begin{macro}{\semesterplannerLua@encircle}
+% This macro puts a circle arround its argument for better readability. In
+% this package this is used for the fontawesome symbols.
+%    \begin{macrocode}
+    \newcommand*{\semesterplannerLua@encircle}[1]{
+        \begin{minipage}[b][1em][c]{1.5em}
+            \begin{tikzpicture}
+                \node[fill,circle,inner sep=1pt, color = white] {#1};
+            \end{tikzpicture}   
+        \end{minipage}
+    }
+%    \end{macrocode}
+% \end{macro}
+%    Commands for exams
+%   \begin{macro}{\oral}
+%    \begin{macrocode}
+\protected\def\oral{\faComment}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\written}
+%    \begin{macrocode}
+\protected\def\written{\faPencil}
+%    \end{macrocode}
+%   \end{macro}
+%   Commands for symbols of priority
+%   \begin{macro}{\pmandatory}
+%    \begin{macrocode}
+    \protected\def\pmandatory{\semesterplannerLua@encircle{\textcolor{red}{\faWarning}}}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\phigh}
+%    \begin{macrocode}
+    \protected\def\phigh{\semesterplannerLua@encircle{\textcolor{red}{\faFlag}}}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\pmid}
+%    \begin{macrocode}
+    \protected\def\pmid{\semesterplannerLua@encircle{\textcolor{yellow}{\faFlag}}}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\plow}
+%    \begin{macrocode}
+    \protected\def\plow{\semesterplannerLua@encircle{\textcolor{green}{\faFlag}}}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\pnone}
+%    \begin{macrocode}
+    \protected\def\pnone{\semesterplannerLua@encircle{\textcolor{gray}{\faTimesCircle}}}
+%    \end{macrocode}
+%   \end{macro}
+
+%   Commands for online platforms.
+%   \begin{macro}{\teams}
+%    \begin{macrocode}
+    \protected\def\teams{\semesterplannerLua@encircle{\textcolor{DodgerBlue}{\faWindows}}}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\zoom}
+%    \begin{macrocode}
+    \protected\def\zoom{\semesterplannerLua@encircle{\textcolor{DodgerBlue}{\faCamera}}}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\youtube}
+%    \begin{macrocode}
+    \protected\def\youtube{\semesterplannerLua@encircle{\textcolor{red}{\faYoutubePlay}}}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\BBB}
+%    \begin{macrocode}
+    \protected\def\BBB{\semesterplannerLua@encircle{\textcolor{DodgerBlue}{\faBold}}}
+%    \end{macrocode}
+%   \end{macro}
+
+%   Command for "To be determined" and "To be Announced"
+%   \begin{macro}{\tbd}
+%    \begin{macrocode}
+    \protected\def\tbd{\faQuestion}
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\tba}
+%    \begin{macrocode}
+    \protected\def\tba{\faBullhorn}
+%    \end{macrocode}
+%   \end{macro}
+
+
+% Load the lua modules
+%    \begin{macrocode}
+\directlua{sp = require("semesterplannerLua_timetable.lua")}
+\directlua{cal = require("semesterplannerLua_calendar.lua")}
+%    \end{macrocode}
+% Set all the pgfkeys required for the arguments. To achieve that the
+% defaults are restored every time the environment is used, this is
+% inside the environment definition. This of course disables all
+% possibilities of setting a global default but enables setting local
+% defaults for the events
+%    \begin{macrocode}
+    \pgfkeys{
+%    \end{macrocode}
+% |/semesterplannerLua| will be the pgf-path used for this package. Here
+% all used keys are set (and initialized with defaults. |timetable/env/|:
+% \begin{description}
+%   \item[|days|] is a list of
+%       strings representing the header names for the day columns in the
+%       timetable (adding Sat and Sun (additional entries) will result in
+%       two more columns.
+%   \item[|start time|] can be used to set a fixed time where the timetable
+%       starts (otherwise this is calculated from the entries) to enable
+%       this behaviour this key has to be set to |HH*60 + MM| (easy way
+%       is by using |start time/.evaluated={HH*60+MM}|)
+%   \item[|end time|] equivalent to |start time|
+%   \item[|width|] is
+%       the horizontal width of the timetable (not including the column
+%       headers on the top) this can be a latex length string or
+%       |\textwidth| as well.
+%   \item[|length|] is the vertical length of the
+%       timetable (not including the clock labels on the side)
+%       measured in cm (in future versions this may become measured in
+%       pts for better interaction with the LaTeX lengths.
+% \end{description}
+%    \begin{macrocode}
+        /semesterplannerLua/timetable/env/.cd,
+        days/.initial={Mon,Thue,Wend,Thur,Fri}, days/.default={Mon,Thue,Wend,Thur,Fri},
+        dayse/.initial={M,T,W,Th,F}, dayse/.default={M,T,W,Th,F},
+        %
+        start time/.initial=, start time/.default=,
+        end time/.initial=, end time/.default=,
+        %
+        width/.initial=\textwidth, width/.default=\textwidth,
+        length/.initial=10, length/.default=10,
+        %
+%    \end{macrocode}
+% |timetable/event/|:
+% \begin{description}
+%   \item[|content|] is the content of the event (is passed on without any
+%           formatting). Since this is passed to lua without modification
+%           its value must be an unexpanded string (lua will simply print
+%           it so the eventually the string will be evaluated)
+%   \item[|time|] is a |HH:MM-HH:MM| string representing start- and
+%       end-time of the event. Used in constructing the content as well
+%   \item[|day|] is either |M|,|T|,|W|,|Th| or |F| specifying the day on
+%       which the event takes place
+%   \item[|tikz|] this key allows the user to manually pass options to the
+%       node created for this event
+%   \item[|scale width|] allows to scale the width of the event to be able
+%       to draw overlapping events besides each other. Will usually be a
+%       value between |0| and |1|.
+%   \item[|offset|] same goal like |scale width| but shifts the event node
+%       by the given value to the right. (Given as value between |0| and
+%       |1| indicating how many columns the event should be shifted)
+%   \item[|textcolor|] foreground color of the content text
+%   \item[|title|] title (set in bold by default)
+%   \item[|speaker|] 
+%   \item[|location|] 
+%   \item[|prio|] 
+%   \item[|formatter|] this is special
+% \end{description}
+%    \begin{macrocode}
+        /semesterplannerLua/timetable/event/.cd,
+        % event arguments
+        content/.initial=, content/.default=,
+        %
+        time/.initial=, time/.default=,
+        day/.initial=, day/.default=,
+        %
+        tikz/.initial=, tikz/.default=,
+        scale width/.initial=1, scale width/.default=1,
+        offset/.initial=0, offset/.default=0,
+        %
+        textcolor/.initial=, textcolor/.default=,
+        title/.initial=, title/.default=,
+        speaker/.initial=, speaker/.default=,
+        location/.initial=, location/.default=,
+        password/.initial=, password/.default=,
+        prio/.initial=, prio/.default=,
+        type/.initial=, type/.default=,
+        formatter/.initial=timetableformatter, formatter/.default=timetableformatter,
+        %
+%    \end{macrocode}
+% |calendar/|:
+% \begin{description}
+%   \item[|draw|] 
+%   \item[|room|] 
+%   \item[|prio|] 
+%   \item[|course|] 
+%   \item[|desc|] 
+%   \item[|start|] 
+%   \item[|end|] 
+%   \item[|tikz|] 
+%   \item[|period|] 
+%   \item[|shift|] 
+%   \item[|print|] Only makes sence if the command is suffixed by a |%|
+%       otherwise somehow a space gets inserted (eventhough the |%| is
+%       inserted from lua as well
+% \end{description}
+%    \begin{macrocode}
+        /semesterplannerLua/calendar/.cd,
+        draw/.initial={true}, draw/.default={true},
+        room/.initial={}, room/.default={},
+        time/.initial={}, time/.default={},
+        prio/.initial={}, prio/.default={},
+        course/.initial={}, course/.default={},
+        desc/.initial={}, desc/.default={},
+        type/.initial={}, type/.default={},
+        date/.initial={}, date/.default={},
+        end/.initial={}, end/.default={},
+        tikz/.initial={}, tikz/.default={},
+        period/.initial={nil}, period/.default={nil},
+        shift/.initial={true}, shift/.default={true},
+        print/.initial={true}, print/.default={true},
+    }
+%    \end{macrocode}
+%
+% \subsection{Tikz Calendar add weekday labels}
+%    \begin{macrocode}
+\tikzoption{day headings}{\tikzstyle{day heading}=[#1]}
+\tikzstyle{day heading}=[]
+\tikzstyle{day letter headings}=[
+    execute before day scope={ \ifdate{day of month=1}{%
+      \pgfmathsetlength{\pgf@ya}{\tikz@lib@cal@yshift}%
+      \pgfmathsetlength\pgf@xa{\tikz@lib@cal@xshift}%
+      \pgftransformyshift{-\pgf@ya}
+      \foreach \d/\l in {0/M,1/T,2/W,3/T,4/F,5/S,6/S} {
+        \pgf@xa=\d\pgf@xa%
+        \pgftransformxshift{\pgf@xa}%
+        \pgftransformyshift{\pgf@ya}%
+        \node[every day,day heading]{\l};%
+      } 
+    }{}%
+  }%
+]
+%    \end{macrocode}
+%
+% \subsubsection{Local Stuff (timetable-env local)}
+% \begin{environment}{timetable}
+% This is the environment doing all the stuff. To gate the positions where
+% the corresponding macros can be used (and in terms of pgfkeys for reasons
+% of default values) all the macros used are put into the environment.
+%    \begin{macrocode}
+\newenvironment{timetable}[1][]{
+    \section*{\faClockO~Timetable}
+%    \end{macrocode}
+%
+%   Read the argumens given by the user after restoring the defaults
+%   (Restoring currently makes no sense, since they are created a few
+%   lines above anyways, but creation might be moved outside the
+%   environment some day.\\
+%   Afterwards the lua module is beeing initialized (erase data from
+%   possible previous runs.
+%    \begin{macrocode}
+    \pgfkeys{/semesterplannerLua/timetable/env/.cd, days,dayse, start time,end time, width,length, #1}
+    \directlua{sp.init{
+        days=[[\pgfkeysvalueof{/semesterplannerLua/timetable/env/days}]],
+        min=[[\pgfkeysvalueof{/semesterplannerLua/timetable/env/start time}]],
+        max=[[\pgfkeysvalueof{/semesterplannerLua/timetable/env/end time}]],
+        dayse=[[\pgfkeysvalueof{/semesterplannerLua/timetable/env/dayse}]]}}
+%    \end{macrocode}
+%   \begin{macro}{\semesterplannerLua@event}
+% Is used to pass the event to the lua engine which in turn will collect
+% the event to draw it in the end. For that the arguments given are parsed
+% after restoring the pgf keys to their default values. The optional
+% argument herby is a sequence of pgf keys, the second argument is
+% a string representing the content (this MUST be unexpanded since
+% this is passed to lua which in turn will pass it unmodified back)
+%    \begin{macrocode}
+    \newcommand{\semesterplannerLua@event}[1][]{
+        \pgfkeys{/semesterplannerLua/timetable/event/.cd,content,time,day,tikz,scale
+        width,offset,textcolor,title,speaker,type,location,password,prio,formatter, ##1}
+        \directlua{
+            sp.addEvent{
+                time="\pgfkeysvalueof{/semesterplannerLua/timetable/event/time}",
+                day="\pgfkeysvalueof{/semesterplannerLua/timetable/event/day}",
+                tikz=[[\pgfkeysvalueof{/semesterplannerLua/timetable/event/tikz}]],
+                offset=\pgfkeysvalueof{/semesterplannerLua/timetable/event/offset},
+                scale_width=\pgfkeysvalueof{/semesterplannerLua/timetable/event/scale width},
+                formatter=\pgfkeysvalueof{/semesterplannerLua/timetable/event/formatter},
+                textcolor=[[\pgfkeysvalueof{/semesterplannerLua/timetable/event/textcolor}]],
+                title=[[\pgfkeysvalueof{/semesterplannerLua/timetable/event/title}]],
+                speaker=[[\pgfkeysvalueof{/semesterplannerLua/timetable/event/speaker}]],
+                location=[[\pgfkeysvalueof{/semesterplannerLua/timetable/event/location}]],
+                password=[[\pgfkeysvalueof{/semesterplannerLua/timetable/event/password}]],
+                prio=[[\pgfkeysvalueof{/semesterplannerLua/timetable/event/prio}]],
+                type=[[\pgfkeysvalueof{/semesterplannerLua/timetable/event/type}]],
+            }
+        }
+    }
+%    \end{macrocode}
+%   \end{macro}
+% Short-hand macros for different events using the corresponding
+% background color
+%
+%   \begin{macro}{\lecture}
+%    \begin{macrocode}
+    \newcommand{\lecture}[1][]{
+        \semesterplannerLua@event[tikz={fill=lecture,}, textcolor=white, type=lect, ##1]
+        \ignorespaces
+    }
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\seminar}
+%    \begin{macrocode}
+    \newcommand{\seminar}[1][]{
+        \semesterplannerLua@event[tikz={fill=seminar,}, textcolor=white, type=sem, ##1]
+        \ignorespaces
+    }
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\tutorial}
+%    \begin{macrocode}
+    \newcommand{\tutorial}[1][]{
+        \semesterplannerLua@event[tikz={fill=tutorial,}, textcolor=white, type=tut, ##1]
+        \ignorespaces
+    }
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\meeting}
+%    \begin{macrocode}
+    \newcommand{\meeting}[1][]{
+        \semesterplannerLua@event[tikz={fill=meeting,}, textcolor=white, type=meet, ##1]
+        \ignorespaces
+    }
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\officehour}
+%    \begin{macrocode}
+    \newcommand{\officehour}[1][]{
+        \semesterplannerLua@event[tikz={fill=officehour,}, textcolor=white, type=office, ##1]
+        \ignorespaces
+    }
+%    \end{macrocode}
+%   \end{macro}
+%    \begin{macrocode}
+}{
+%    \end{macrocode}
+% At the end of the environment after all events have been collected,
+% generate and output the tikz code needed to draw the timetable.
+%    \begin{macrocode}
+    \directlua{sp.draw(
+        [[\pgfkeysvalueof{/semesterplannerLua/timetable/env/length}]],
+        [[\pgfkeysvalueof{/semesterplannerLua/timetable/env/width}]])}
+}
+%    \end{macrocode}
+% \end{environment}
+%
+%    \begin{macrocode}
+
+%    \end{macrocode}
+% \begin{macro}{printSpCalendar}
+% Print a calendar from startDate to endDate (encoded as YYYY-MM-DD) as
+% one calendar per month in a matrix with the given amount of columns
+%    \begin{macrocode}
+\newcommand{\printSpCalendar}[3][3]{\directlua{cal.drawCalendar("#2", "#3", #1)}}
+%    \end{macrocode}
+% \end{macro}
+%    \begin{macrocode}
+
+\newenvironment{appointments}[2][Room]{
+    \directlua{cal.init(#2)}
+    \newcommand{\appointment}[1][]{%
+        \pgfkeys{/semesterplannerLua/calendar/.cd,draw,room,time,prio,course,desc,date,end,tikz,period,type,shift,print, ##1}%
+        \directlua{
+            cal.addAppointment{draw=\pgfkeysvalueof{/semesterplannerLua/calendar/draw},
+            room=[[\pgfkeysvalueof{/semesterplannerLua/calendar/room}]],
+            time=[[\pgfkeysvalueof{/semesterplannerLua/calendar/time}]],
+            prio=[[\pgfkeysvalueof{/semesterplannerLua/calendar/prio}]],
+            course=[[\pgfkeysvalueof{/semesterplannerLua/calendar/course}]],
+            desc=[[\pgfkeysvalueof{/semesterplannerLua/calendar/desc}]],
+            date=[[\pgfkeysvalueof{/semesterplannerLua/calendar/date}]],
+            endDate=[[\pgfkeysvalueof{/semesterplannerLua/calendar/end}]],
+            tikz=[[\pgfkeysvalueof{/semesterplannerLua/calendar/tikz}]],
+            period=\pgfkeysvalueof{/semesterplannerLua/calendar/period},
+            shift=\pgfkeysvalueof{/semesterplannerLua/calendar/shift},
+            print=\pgfkeysvalueof{/semesterplannerLua/calendar/print}}}%
+        \ignorespaces
+        }
+    \section*{\faCalendar~Appointments}
+    \begin{tabular}{rlllll}
+        \textbf{Date}&\textbf{Time}&\textbf{Course}&\textbf{Description}&\textbf{#1}&\textbf{Prio.}\\
+}{
+    \end{tabular}
+}
+
+\newenvironment{exams}[1]{
+    \directlua{cal.init(#1)}
+    \newcommand{\exam}[1][]{%
+        \pgfkeys{/semesterplannerLua/calendar/.cd,draw,room,time,prio,course,desc,date,end,tikz,period,type,shift,print, ##1}%
+        \directlua{
+            cal.addExam{
+                draw=\pgfkeysvalueof{/semesterplannerLua/calendar/draw},
+                room=[[\pgfkeysvalueof{/semesterplannerLua/calendar/room}]],
+                time=[[\pgfkeysvalueof{/semesterplannerLua/calendar/time}]],
+                course=[[\pgfkeysvalueof{/semesterplannerLua/calendar/course}]],
+                desc=[[\pgfkeysvalueof{/semesterplannerLua/calendar/desc}]],
+                date=[[\pgfkeysvalueof{/semesterplannerLua/calendar/date}]],
+                tikz=[[\pgfkeysvalueof{/semesterplannerLua/calendar/tikz}]],
+                type=[[\pgfkeysvalueof{/semesterplannerLua/calendar/type}]],
+                shift=\pgfkeysvalueof{/semesterplannerLua/calendar/shift},
+                print=\pgfkeysvalueof{/semesterplannerLua/calendar/print}}}%
+        \ignorespaces
+        }
+    \section*{\faStickyNoteO~Exams}
+    \begin{tabular}{rllll}
+        \textbf{Date}&\textbf{Time}&\textbf{Course}&\textbf{Type}&\textbf{Note}\\
+}{
+    \end{tabular}
+}
+
+\newenvironment{deadlines}[1]{
+    \directlua{cal.init(#1)}
+    \newcommand{\deadline}[1][]{%
+        \pgfkeys{/semesterplannerLua/calendar/.cd,draw,room,time,prio,course,desc,date,end,tikz,period,type,shift,print, ##1}%
+        \directlua{
+            cal.addDeadline{
+                draw=\pgfkeysvalueof{/semesterplannerLua/calendar/draw},
+                course=[[\pgfkeysvalueof{/semesterplannerLua/calendar/course}]],
+                desc=[[\pgfkeysvalueof{/semesterplannerLua/calendar/desc}]],
+                date=[[\pgfkeysvalueof{/semesterplannerLua/calendar/date}]],
+                tikz=[[\pgfkeysvalueof{/semesterplannerLua/calendar/tikz}]],
+                prio=[[\pgfkeysvalueof{/semesterplannerLua/calendar/prio}]],
+                shift=\pgfkeysvalueof{/semesterplannerLua/calendar/shift},
+                print=\pgfkeysvalueof{/semesterplannerLua/calendar/print}}}%
+        \ignorespaces
+        }
+    \section*{\faStickyNoteO~Deadlines}
+    \begin{tabular}{rlll}
+        \textbf{Date}&\textbf{Course}&\textbf{Description}&\textbf{Prio}\\
+}{
+    \end{tabular}
+}
+%    \end{macrocode}
+\endinput
+%
+% \iffalse
+%</package>
+% \fi
+%
+% \Finale
+\endinput
