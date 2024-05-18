@@ -36,7 +36,7 @@ function defaultFormatter(opts)
         if type(v) == "string" then v = v:gsub("[_^]", "") end
         ret = string.format("%s, %s: %s", ret, tostring(k), tostring(v))
     end
-    print(ret)
+    -- print(ret)
     return ret
 end
 
@@ -47,7 +47,7 @@ function timetableformatter(opts)
 end
 -- result are the global variables EVENTS, MIN and MAX
 function addEvent(opts)
-    print("Reading event on line ", tex.inputlineno)
+    -- print("Reading event on line ", tex.inputlineno)
     opts.inputlineno = tex.inputlineno
     if(not checkKeys(opts, {"time", "day", "tikz"})) then
         error("missing argument")
@@ -140,7 +140,7 @@ function draw(length, width)
         if e.from < max and e.to > min then -- only draw if event is in scope (part of the comp is done in addEvent from < to
             if e.to   > max then e.to   = max end
             if e.from < min then e.from = min end
-            print("Drawing event on line ", e.inputlineno)
+            -- print("Drawing event on line ", e.inputlineno)
             d = day2Int(e.day)
             tex.print(string.format(
                 [[\node[defStyle,text width=-%fem+%f%s/%d, text depth=%fcm-%fem, text height=%fem, %s] at (%f*%s,%fcm) {%s};]],

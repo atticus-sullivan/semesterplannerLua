@@ -24,7 +24,7 @@ end
 
 function addEvent(opts)
     opts.inputlineno = tex.inputlineno
-    print(string.format("collecting from line %d", opts.inputlineno))
+    -- print(string.format("collecting from line %d", opts.inputlineno))
     if opts.draw then
         assert(opts.date ~= nil and opts.tikz ~= nil, "date and tikz has to be given")
         if opts.endDate == nil or opts.endDate == '' then
@@ -98,7 +98,7 @@ function drawCalendar(minDate, maxDate, cols)
         local usedDates = {}
         text.print([[\begin{scope}[on background layer] ]])
         for i,ele in ipairs(EVENTS) do
-            print(string.format("Drawing item from line %d", ele.inputlineno))
+            -- print(string.format("Drawing item from line %d", ele.inputlineno))
             while ele.date <= maxDate and (ele.endDate == nil or ele.date <= ele.endDate) do
                 local xshift = 0
                 if ele.shift then
