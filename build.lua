@@ -1,4 +1,4 @@
-module = "semesterplannerLua"
+module = "semesterplannerlua"
 typesetexe = "lualatex"
 unpackexe = "luatex"
 
