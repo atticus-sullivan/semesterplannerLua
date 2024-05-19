@@ -2,7 +2,7 @@
 
 Author: Lukas Heindl (`oss.heindl+latex@protonmail.com`).
 
-CTAN page: not yet
+CTAN page: [semesterplannerlua](https://ctan.org/pkg/semesterplannerlua)
 
 ## License
 The LaTeX package `semesterplannerLua` is distributed under the LPPL 1.3 license.
