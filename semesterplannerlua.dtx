@@ -21,12 +21,12 @@
 %
 % \iffalse
 %<*driver>
-\ProvidesFile{semesterplannerLua.dtx}
+\ProvidesFile{semesterplannerlua.dtx}
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
-%<package>\ProvidesPackage{semesterplannerLua}
+%<package>\ProvidesPackage{semesterplannerlua}
 %<*package>
-   [2024/05/19 v1.1.0 Semesterplanner package in lua with tikz only]
+   [2024/05/19 v1.1.1 Semesterplanner package in lua with tikz only]
 %</package>
 %
 %<*driver>
@@ -34,7 +34,7 @@
 \usepackage[a4paper,margin=25mm,left=50mm,nohead]{geometry}
 \usepackage[numbered]{hypdoc}
 \usepackage{array}
-\usepackage{semesterplannerLua}[2024/02/27]
+\usepackage{semesterplannerlua}[2024/02/27]
 \EnableCrossrefs
 \CodelineIndex
 \RecordChanges
@@ -75,12 +75,13 @@
 % l3build}
 % \changes{v1.0.0}{2024/02/27}{First full release}
 % \changes{v1.1.0}{2024/05/19}{Make ready for CTAN}
+% \changes{v1.1.1}{2024/05/19}{Make ready for CTAN (2)}
 %
 %
 % \DoNotIndex{\newcommand,\newenvironment,\\,\begin,\end,\def,\definecolor,\directlua,\endinput,\faBullhorn,\faCamera,\faFlag,\faQuestion,\faTimesCircle,\faWarning,\faWindows,\faYoutubePlay,\node,\pgfkeys,\pgfkeysvalueof,\protected,\raggedright,\textbf,\textcolor,\textwidth,\unexpanded,\",\x,\y,\year,\week,\tiny,\tikz@lib@cal@xshift,\tikz@lib@cal@yshift,\tikz,\textit,\t,\section,\phantom,\pgftransformyshift,\pgftransformxshif,\pgfmathsetlength,\pgf@ya,\pgf@xa,\openout,\n,\newwrite,\month,\minuteToFrac,\matrix,\l,\jobname,\init,\immediate,\ignorespaces,\ifdate,\hfil,\href,\foreach,\faStickyNoteO,\faPencil,\faComment,\faClockO,\faCalendar,\faBold,\draw,\d,\day,\checkKeys,\%,\RequirePackage,\usepackage,\usetikzlibrary,\pgftransformxshift}
 %
 % \providecommand*{\url}{\texttt}
-% \GetFileInfo{semesterplannerLua.dtx}
+% \GetFileInfo{semesterplannerlua.dtx}
 % \title{\textsf{semesterplannerLua} --- Semesterplanner package in lua
 %   with tikz only
 % }
@@ -105,6 +106,7 @@
 % \tableofcontents
 %
 % \section{Usage}
+% Load with |\usepackage{semesterplannerlua}|
 % \subsection{timetable}
 %
 % \DescribeEnv{timetable} |\begin{timetable}[opts]...\end{timetable}|\\
@@ -423,7 +425,7 @@
 % This package uses |semesterplannerLua| as prefix/directory where
 % possible. Since this is not possible for latex macro names, in this
 % occasions |semesterplannerLua@| is used as prefix.
-% \subsection{semesterplannerLua.sty}
+% \subsection{semesterplannerlua.sty}
 % \subsubsection{Global Stuff}
 %    \begin{macrocode}
 %<*package>

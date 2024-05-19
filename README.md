@@ -17,13 +17,13 @@ ranges (and mark dates which were previously listed).
 
 For a manual installation:
 
-* put the files `semesterplannerLua.ins` and `semesterplannerLua.dtx` in the
+* put the files `semesterplannerlua.ins` and `semesterplannerlua.dtx` in the
 same directory;
-* run `latex semesterplannerLua.ins` in that directory.
+* run `latex semesterplannerlua.ins` in that directory.
 
-The file `semesterplannerLua.sty` will be generated.
+The file `semesterplannerlua.sty` will be generated.
 
-In addition to the `semesterplannerLua.sty` the files
+In addition to the `semesterplannerlua.sty` the files
 `semesterplannerLua_calendar.lua` and `semesterplannerLua_timetable.lua` are
 also required. 
 You have to put them in the same directory as your document or (best) in a `texmf` tree. 
