@@ -34,6 +34,7 @@
 \usepackage[a4paper,margin=25mm,left=50mm,nohead]{geometry}
 \usepackage[numbered]{hypdoc}
 \usepackage{array}
+\usepackage{babel}
 \usepackage{semesterplannerlua}[2024/02/27]
 \EnableCrossrefs
 \CodelineIndex
@@ -111,12 +112,12 @@
 %
 % \DescribeEnv{timetable} |\begin{timetable}[opts]...\end{timetable}|\\
 % This is the core environment of this package. Within it you can use
-% |\lecture|, |\seminar|, |\tutorial|, |\officehour| and |\meeting|. All
-% these commands are only defined inside the |timetable| environment, and
-% have the same structure. It typesets a timetable with the specified
-% entries. If you have a look at the |.sty| file you'll see that these
-% macros just take a general macro and set some default values before. Thus
-% it is easy to define new ones (keep in mind that you'll need
+% |\lecture|, |\seminar|, |\tutorial|, |\officehour|, |\laboratory|,
+% |\fieldstudy| and |\meeting|. All these commands are only defined inside the
+% |timetable| environment, and have the same structure. It typesets a timetable
+% with the specified entries. If you have a look at the |.sty| file you'll see
+% that these macros just take a general macro and set some default values
+% before. Thus it is easy to define new ones (keep in mind that you'll need
 % |\makeatletter|) to access the general macro.
 %
 % Writes out a file containing the data from the timetable (your events) to
@@ -134,7 +135,7 @@
 %     column names. Note that if you specify only 4 names only these 4
 %     columns will be printed (with the first day being identified as
 %     Monday)
-%     \textit{Default: |Mon,Thue,Wend,Thur,Fri|}
+%     \textit{Default: |Mon,Tue,Wend,Thur,Fri|}
 %     \item[|dayse|] List of strings used in the code to idenfity the day.
 %     This list is kind of a mapping string $\to$ integer.
 %     \item[|start time|] Explicit start-time of the timetable given in minutes
@@ -160,6 +161,10 @@
 % \DescribeMacro{\officehour} |\officehour[opts]|
 %
 % \DescribeMacro{\meeting}    |\meeting   [opts]|
+%
+% \DescribeMacro{\fieldstudy} |\fieldstudy[opts]|
+%
+% \DescribeMacro{\laboratory} |\laboratory[opts]|
 %
 % |opts| are optional arguments (enclosed with |{}|) separated with |,|:
 % \begin{description}
@@ -211,35 +216,35 @@
 % |\settowidth{\length}{12:30}| to set a length to the length of a clock
 % label and then subtract this from the length you want to specify.
 %
-% \hangindent=4.5em \hangafter=1 \textbf{Hint:} The content of the
-% environment isn't processed by this package. Only the event commands (so
-% to speak |\lecture|,|\tutorial|,|\seminar|,|\officehour|,|\meeting| are
-% relevant.  All other contents are set immediately before the timetable.
-% Therefore, if you wan to add e.g. a |\hspace*{10cm}| to shift the
-% timetable to the left, the last line of the env would be the place to do
-% so (there musn't be an empty line below since otherwise a new paragraph
-% is started).
+% \hangindent=4.5em \hangafter=1 \textbf{Hint:} The content of the environment
+% isn't processed by this package. Only the event commands (so to speak
+% |\lecture|,|\tutorial|,|\seminar|,|\officehour|,|\fieldstudy|,|\laboratory|,|\meeting|
+% are relevant.  All other contents are set immediately before the timetable.
+% Therefore, if you wan to add e.g. a |\hspace*{10cm}| to shift the timetable
+% to the left, the last line of the env would be the place to do so (there
+% musn't be an empty line below since otherwise a new paragraph is started).
 %
 % \newpage
 % \subsubsection{Example}
 % |\begin{timetable}[|\\
-% |        days={Mon,Thue,Wend,Thur,Fri},|\\
+% |        days={Mon,Tue,Wend,Thur,Fri},|\\
 % |        start time/.evaluated={11*60}, end time/.evaluated={15*60}|\\
 % |    ]|\\
-% |    \lecture[title={TestingLectureLongOne},speaker={Doe},|\\
+% |    \lecture[title={Testing Lecture LongOne},speaker={Doe},|\\
 % |        location={RN1},day={W},time={12:30-13:30}]|\\
-% |    \lecture[title={TestingLectureLongOne},speaker={John},|\\
+% |    \tutorial[title={Testing Lecture LongOne},speaker={John},|\\
 % |        location={RN1},day={Th},time={12:30-13:30},offset=0.5,scale width=0.5]|\\
-% |    \lecture[title={TestingLectureLongOne},speaker={Dr. Doe},|\\
+% |    \lecture[title={Testing Lecture LongOne},speaker={Dr. Doe},|\\
 % |        location={\zoom},day={T},time={12:30-13:30},prio={\phigh}]|\\
 % |\end{timetable}|\\
 %
-% \begin{timetable}[days={Mon,Thue,Wend,Thur,Fri}, start
-% time/.evaluated={11*60}, end time/.evaluated={15*60}]
-%   \lecture[title={TestingLectureLongOne}, speaker={Heindl}, location={RN1},   day={W},  time={12:30-13:30}]
-%   \lecture[title={TestingLectureLongOne}, speaker={Heindl}, location={RN1},   day={Th}, time={12:30-13:30}, offset=0.5, scale width=0.5]
-%   \lecture[title={TestingLectureLongOne}, speaker={Heindl}, location={\zoom}, day={T},  time={12:30-13:30}, prio={\phigh}]
-%   \hspace*{-.2\textwidth}
+% \begin{timetable}[days={Mon,Tue,Wend,Thur,Fri},start time/.evaluated={11*60}, end time/.evaluated={15*60}]
+%     \lecture[title={Testing Lecture LongOne},speaker={Doe},
+%         location={RN1},day={W},time={12:30-13:30}]
+%     \tutorial[title={Testing Lecture LongOne},speaker={John},
+%         location={RN1},day={Th},time={12:30-13:30},offset=0.5,scale width=0.5]
+%     \lecture[title={Testing Lecture LongOne},speaker={Dr. Doe},
+%         location={\zoom},day={T},time={12:30-13:30},prio={\phigh}]
 % \end{timetable}
 %
 % \subsection{Calendar related things}
@@ -442,6 +447,8 @@
 \definecolor{lecture}{rgb}{0.2, 0.7, 1.0}
 \definecolor{tutorial}{rgb}{0.0, 0.8, 0.0}
 \definecolor{meeting}{rgb}{0.8, 0.0, 0.0}
+\definecolor{laboratory}{rgb}{0.8, 0.0, 0.0}
+\definecolor{fieldstudy}{rgb}{0.8, 0.0, 0.0}
 \definecolor{officehour}{rgb}{0.0, 0.4, 0.6}
 \definecolor{DodgerBlue}{HTML}{1E90FF}
 %    \end{macrocode}
@@ -567,7 +574,7 @@
 % \end{description}
 %    \begin{macrocode}
         /semesterplannerLua/timetable/env/.cd,
-        days/.initial={Mon,Thue,Wend,Thur,Fri}, days/.default={Mon,Thue,Wend,Thur,Fri},
+        days/.initial={Mon,Tue,Wend,Thur,Fri}, days/.default={Mon,Tue,Wend,Thur,Fri},
         dayse/.initial={M,T,W,Th,F}, dayse/.default={M,T,W,Th,F},
         %
         start time/.initial=, start time/.default=,
@@ -695,7 +702,7 @@
 %   Afterwards the lua module is beeing initialized (erase data from
 %   possible previous runs.
 %    \begin{macrocode}
-    \pgfkeys{/semesterplannerLua/timetable/env/.cd, days,dayse, start time,end time, width,length, #1}
+    \pgfkeys{/semesterplannerLua/timetable/env/.cd,days,dayse,start time,end time,width,length,#1}
     \directlua{sp.init{
         days=[[\pgfkeysvalueof{/semesterplannerLua/timetable/env/days}]],
         min=[[\pgfkeysvalueof{/semesterplannerLua/timetable/env/start time}]],
@@ -772,6 +779,22 @@
 %    \begin{macrocode}
     \newcommand{\officehour}[1][]{
         \semesterplannerLua@event[tikz={fill=officehour,}, textcolor=white, type=office, ##1]
+        \ignorespaces
+    }
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\laboratory}
+%    \begin{macrocode}
+    \newcommand{\laboratory}[1][]{
+        \semesterplannerLua@event[tikz={fill=laboratory,}, textcolor=white, type=lab, ##1]
+        \ignorespaces
+    }
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\fieldstudy}
+%    \begin{macrocode}
+    \newcommand{\fieldstudy}[1][]{
+        \semesterplannerLua@event[tikz={fill=fieldstudy,}, textcolor=white, type=fieldstudy, ##1]
         \ignorespaces
     }
 %    \end{macrocode}
