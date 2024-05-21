@@ -111,12 +111,12 @@
 %
 % \DescribeEnv{timetable} |\begin{timetable}[opts]...\end{timetable}|\\
 % This is the core environment of this package. Within it you can use
-% |\lecture|, |\seminar|, |\tutorial|, |\officehour| and |\meeting|. All
-% these commands are only defined inside the |timetable| environment, and
-% have the same structure. It typesets a timetable with the specified
-% entries. If you have a look at the |.sty| file you'll see that these
-% macros just take a general macro and set some default values before. Thus
-% it is easy to define new ones (keep in mind that you'll need
+% |\lecture|, |\seminar|, |\tutorial|, |\officehour|, |\laboratory|,
+% |\fieldstudy| and |\meeting|. All these commands are only defined inside the
+% |timetable| environment, and have the same structure. It typesets a timetable
+% with the specified entries. If you have a look at the |.sty| file you'll see
+% that these macros just take a general macro and set some default values
+% before. Thus it is easy to define new ones (keep in mind that you'll need
 % |\makeatletter|) to access the general macro.
 %
 % Writes out a file containing the data from the timetable (your events) to
@@ -160,6 +160,10 @@
 % \DescribeMacro{\officehour} |\officehour[opts]|
 %
 % \DescribeMacro{\meeting}    |\meeting   [opts]|
+%
+% \DescribeMacro{\fieldstudy} |\fieldstudy[opts]|
+%
+% \DescribeMacro{\laboratory} |\laboratory[opts]|
 %
 % |opts| are optional arguments (enclosed with |{}|) separated with |,|:
 % \begin{description}
@@ -211,14 +215,13 @@
 % |\settowidth{\length}{12:30}| to set a length to the length of a clock
 % label and then subtract this from the length you want to specify.
 %
-% \hangindent=4.5em \hangafter=1 \textbf{Hint:} The content of the
-% environment isn't processed by this package. Only the event commands (so
-% to speak |\lecture|,|\tutorial|,|\seminar|,|\officehour|,|\meeting| are
-% relevant.  All other contents are set immediately before the timetable.
-% Therefore, if you wan to add e.g. a |\hspace*{10cm}| to shift the
-% timetable to the left, the last line of the env would be the place to do
-% so (there musn't be an empty line below since otherwise a new paragraph
-% is started).
+% \hangindent=4.5em \hangafter=1 \textbf{Hint:} The content of the environment
+% isn't processed by this package. Only the event commands (so to speak
+% |\lecture|,|\tutorial|,|\seminar|,|\officehour|,|\fieldstudy|,|\laboratory|,|\meeting|
+% are relevant.  All other contents are set immediately before the timetable.
+% Therefore, if you wan to add e.g. a |\hspace*{10cm}| to shift the timetable
+% to the left, the last line of the env would be the place to do so (there
+% musn't be an empty line below since otherwise a new paragraph is started).
 %
 % \newpage
 % \subsubsection{Example}
@@ -442,6 +445,8 @@
 \definecolor{lecture}{rgb}{0.2, 0.7, 1.0}
 \definecolor{tutorial}{rgb}{0.0, 0.8, 0.0}
 \definecolor{meeting}{rgb}{0.8, 0.0, 0.0}
+\definecolor{laboratory}{rgb}{0.8, 0.0, 0.0}
+\definecolor{fieldstudy}{rgb}{0.8, 0.0, 0.0}
 \definecolor{officehour}{rgb}{0.0, 0.4, 0.6}
 \definecolor{DodgerBlue}{HTML}{1E90FF}
 %    \end{macrocode}
@@ -772,6 +777,22 @@
 %    \begin{macrocode}
     \newcommand{\officehour}[1][]{
         \semesterplannerLua@event[tikz={fill=officehour,}, textcolor=white, type=office, ##1]
+        \ignorespaces
+    }
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\laboratory}
+%    \begin{macrocode}
+    \newcommand{\laboratory}[1][]{
+        \semesterplannerLua@event[tikz={fill=laboratory,}, textcolor=white, type=lab, ##1]
+        \ignorespaces
+    }
+%    \end{macrocode}
+%   \end{macro}
+%   \begin{macro}{\fieldstudy}
+%    \begin{macrocode}
+    \newcommand{\fieldstudy}[1][]{
+        \semesterplannerLua@event[tikz={fill=fieldstudy,}, textcolor=white, type=fieldstudy, ##1]
         \ignorespaces
     }
 %    \end{macrocode}
