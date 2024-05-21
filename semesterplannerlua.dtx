@@ -702,7 +702,7 @@
 %   Afterwards the lua module is beeing initialized (erase data from
 %   possible previous runs.
 %    \begin{macrocode}
-    \pgfkeys{/semesterplannerLua/timetable/env/.cd, days,dayse, start time,end time, width,length, #1}
+    \pgfkeys{/semesterplannerLua/timetable/env/.cd,days,dayse,start time,end time,width,length,#1}
     \directlua{sp.init{
         days=[[\pgfkeysvalueof{/semesterplannerLua/timetable/env/days}]],
         min=[[\pgfkeysvalueof{/semesterplannerLua/timetable/env/start time}]],
