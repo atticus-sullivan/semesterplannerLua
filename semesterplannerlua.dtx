@@ -34,6 +34,7 @@
 \usepackage[a4paper,margin=25mm,left=50mm,nohead]{geometry}
 \usepackage[numbered]{hypdoc}
 \usepackage{array}
+\usepackage{babel}
 \usepackage{semesterplannerlua}[2024/02/27]
 \EnableCrossrefs
 \CodelineIndex
@@ -134,7 +135,7 @@
 %     column names. Note that if you specify only 4 names only these 4
 %     columns will be printed (with the first day being identified as
 %     Monday)
-%     \textit{Default: |Mon,Thue,Wend,Thur,Fri|}
+%     \textit{Default: |Mon,Tue,Wend,Thur,Fri|}
 %     \item[|dayse|] List of strings used in the code to idenfity the day.
 %     This list is kind of a mapping string $\to$ integer.
 %     \item[|start time|] Explicit start-time of the timetable given in minutes
@@ -226,7 +227,7 @@
 % \newpage
 % \subsubsection{Example}
 % |\begin{timetable}[|\\
-% |        days={Mon,Thue,Wend,Thur,Fri},|\\
+% |        days={Mon,Tue,Wend,Thur,Fri},|\\
 % |        start time/.evaluated={11*60}, end time/.evaluated={15*60}|\\
 % |    ]|\\
 % |    \lecture[title={TestingLectureLongOne},speaker={Doe},|\\
@@ -572,7 +573,7 @@
 % \end{description}
 %    \begin{macrocode}
         /semesterplannerLua/timetable/env/.cd,
-        days/.initial={Mon,Thue,Wend,Thur,Fri}, days/.default={Mon,Thue,Wend,Thur,Fri},
+        days/.initial={Mon,Tue,Wend,Thur,Fri}, days/.default={Mon,Tue,Wend,Thur,Fri},
         dayse/.initial={M,T,W,Th,F}, dayse/.default={M,T,W,Th,F},
         %
         start time/.initial=, start time/.default=,
